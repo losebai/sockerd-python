@@ -1,11 +1,11 @@
 import asyncio
 from websockets.server import WebSocketServer, serve, WebSocketServerProtocol
 from typing import Optional, Type, Union, Callable, Awaitable, Any
-from websockets.legacy.client import WebSocketClientProtocol
-from AIOWebSocketServerImpl import IWebSocketServer
+from ..AIOWebSocketServerImpl import IWebSocketServer
 
 
 class AIOWebSocketServerImpl(IWebSocketServer):
+    """暂时忽略"""
 
     def __init__(self, ws_handler: Union[
         Callable[[WebSocketServerProtocol], Awaitable[Any]],
@@ -14,6 +14,7 @@ class AIOWebSocketServerImpl(IWebSocketServer):
         self.__loop = asyncio.get_event_loop()
         self.server: serve = serve(ws_handler, host=host, port=port)
         self.ws_server: WebSocketServer = self.server.ws_server
+        self.stop = asyncio.Future()  # set this future to exit the server
 
     async def __aenter__(self) -> WebSocketServer:
         return await self.server.__aenter__()
@@ -40,4 +41,3 @@ class AIOWebSocketServerImpl(IWebSocketServer):
 
     async def register(self, protocol: WebSocketServerProtocol) -> None:
         self.server.ws_server.register(protocol)
-
