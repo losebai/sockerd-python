@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from Entity import Entity
+from .Entity import Entity
 
 
 class Message(ABC):

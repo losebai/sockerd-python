@@ -1,23 +1,23 @@
+import asyncio
 import logging
-import socket
 import ssl
-from websockets.client import connect as Connect
-from urllib.parse import urlparse
-from WsAioClient import WsAioClient
+
+from websockets.client import connect as Connect, WebSocketClientProtocol
 
 logger = logging.getLogger(__name__)
 
 
-class WsBioClientConnector:
-    def __init__(self, client: WsAioClient):
-        self.client: WsAioClient = client
+class WsAioClientConnector:
+    def __init__(self, client: 'WsAioClient'):
+        self.client: 'WsAioClient' = client
         self.real = None
+        self.__loop = asyncio.get_event_loop()
 
-    def connect(self):
-        logger.debug('Start connecting to: {}'.format(self.client.getConfig().getUrl()))
+    def connect(self) -> WebSocketClientProtocol:
+        logger.debug('Start connecting to: {}'.format(self.client.getConfig().url))
 
         # 处理自定义架构的影响
-        ws_url = self.client.getConfig().getUrl().replace('-java://', '://')
+        ws_url = self.client.getConfig().url.replace('-python://', '://')
         # parsed_url = urlparse(ws_url)
 
         # 支持 ssl
@@ -28,7 +28,8 @@ class WsBioClientConnector:
             self.client.getConfig().getSslContext()
             ws_url = ws_url.replace("ws", "wss")
         try:
-            self.real = Connect(ws_url, ssl=self.client.getConfig().getSslContext())
+            self.real = Connect(ws_url, ssl=None)
+            return self.__loop.run_until_complete(self.real.__aenter__())
         except RuntimeError as e:
             raise e
         except Exception as e:
@@ -37,8 +38,8 @@ class WsBioClientConnector:
     def close(self):
         if self.real is None:
             return
-
         try:
             self.real.close()
+            self.__loop.run_until_complete(self.real.__aexit__())
         except Exception as e:
             logger.debug('{}'.format(e))

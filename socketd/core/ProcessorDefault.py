@@ -1,35 +1,39 @@
+from abc import ABC
 from loguru import logger
-from Processor import Processor
-from Costants import Flag
+
+from .Handshake import Handshake
+from .Processor import Processor
+from .Costants import Flag
+from .SimpleListener import SimpleListener
+from .module.Entity import EntityMetas
 
 
-class ProcessorDefault(Processor):
+class ProcessorDefault(Processor, ABC):
 
     def __init__(self):
         self.listener = SimpleListener()
+        self.log = logger.opt()
 
-    def setListener(self, listener):
+    def set_listener(self, listener):
         if listener is not None:
             self.listener = listener
 
-    def onReceive(self, channel, frame):
-        if self.log.isTraceEnabled():
-            self.log.trace("{}", frame)
+    def on_receive(self, channel, frame):
+        self.log.trace("{}", frame)
 
         if frame.getFlag() == Flag.Connect:
             connectMessage = frame.getMessage()
             channel.setHandshake(Handshake(connectMessage))
             channel.sendConnack(connectMessage)
-            self.onOpen(channel.getSession())
+            self.on_open(channel.getSession())
         elif frame.getFlag() == Flag.Connack:
             message = frame.getMessage()
             channel.setHandshake(Handshake(message))
-            self.onOpen(channel.getSession())
+            self.on_open(channel.getSession())
         else:
             if channel.getHandshake() is None:
                 channel.close()
-                if self.log.isWarnEnabled():
-                    self.log.warn("Channel handshake is None, sessionId={}", channel.getSession().getSessionId())
+                self.log.warning("Channel handshake is None, sessionId={}", channel.getSession().getSessionId())
                 return
 
             channel.setLiveTime()
@@ -41,18 +45,18 @@ class ProcessorDefault(Processor):
                     pass
                 elif frame.getFlag() == Flag.Close:
                     channel.close()
-                    self.onClose(channel.getSession())
+                    self.on_close(channel.getSession())
                 elif frame.getFlag() in [Flag.Message, Flag.Request, Flag.Subscribe]:
-                    self.onReceiveDo(channel, frame, False)
+                    self.on_receive_do(channel, frame, False)
                 elif frame.getFlag() in [Flag.Reply, Flag.ReplyEnd]:
-                    self.onReceiveDo(channel, frame, True)
+                    self.on_receive_do(channel, frame, True)
                 else:
                     channel.close()
-                    self.onClose(channel.getSession())
+                    self.on_close(channel.getSession())
             except Exception as e:
-                self.onError(channel.getSession(), e)
+                self.on_error(channel.getSession(), e)
 
-    def onReceiveDo(self, channel, frame, isReply):
+    def on_receive_do(self, channel, frame, isReply):
         fragmentIdxStr = frame.getMessage().getEntity().getMeta(EntityMetas.META_DATA_FRAGMENT_IDX)
         if fragmentIdxStr is not None:
             index = int(fragmentIdxStr)
@@ -66,16 +70,16 @@ class ProcessorDefault(Processor):
         if isReply:
             channel.retrieve(frame)
         else:
-            self.onMessage(channel.getSession(), frame.getMessage())
+            self.on_message(channel.getSession(), frame.getMessage())
 
-    def onOpen(self, session):
-        self.listener.onOpen(session)
+    def on_open(self, session):
+        self.listener.on_open(session)
 
-    def onMessage(self, session, message):
-        self.listener.onMessage(session, message)
+    def on_message(self, session, message):
+        self.listener.on_message(session, message)
 
-    def onClose(self, session):
-        self.listener.onClose(session)
+    def on_close(self, session):
+        self.listener.on_close(session)
 
-    def onError(self, session, error):
-        self.listener.onError(session, error)
+    def on_error(self, session, error):
+        self.listener.on_error(session, error)

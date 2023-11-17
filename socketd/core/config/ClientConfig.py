@@ -1,5 +1,5 @@
 from urllib.parse import urlparse
-from ConfigBase import ConfigBase
+from .ConfigBase import ConfigBase
 
 
 class ClientConfig(ConfigBase):

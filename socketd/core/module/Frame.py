@@ -1,4 +1,4 @@
-from Message import Message
+from .Message import Message
 from ..Costants import Flag
 
 

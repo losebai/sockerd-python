@@ -1,6 +1,6 @@
 from abc import ABC
 
-from Entity import Entity
+from .Entity import Entity
 
 
 class EntityDefault(Entity, ABC):
@@ -11,7 +11,7 @@ class EntityDefault(Entity, ABC):
         self.data = None
         self.dataSize = 0
 
-    def metaString(self, metaString):
+    def set_metaString(self, metaString):
         self.metaMap = None
         self.metaString = metaString
         self.metaStringChanged = False
@@ -28,7 +28,7 @@ class EntityDefault(Entity, ABC):
             self.metaStringChanged = False
         return self.metaString
 
-    def metaMap(self, metaMap):
+    def set_metaMap(self, metaMap):
         self.metaMap = metaMap
         self.metaString = None
         self.metaStringChanged = True
@@ -47,7 +47,7 @@ class EntityDefault(Entity, ABC):
                         self.metaMap[kv[0]] = ""
         return self.metaMap
 
-    def meta(self, name, val):
+    def set_meta(self, name, val):
         self.putMeta(name, val)
         return self
 
@@ -61,7 +61,7 @@ class EntityDefault(Entity, ABC):
     def getMetaOrDefault(self, name, default_val):
         return self.getMetaMap().get(name, default_val)
 
-    def data(self, data):
+    def set_data(self, data):
         self.data = data
         self.dataSize = len(data)
         return self

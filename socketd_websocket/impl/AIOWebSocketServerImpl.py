@@ -27,6 +27,8 @@ class AIOWebSocketServerImpl(IWebSocketServer):
         await self.server.__aexit__(exc_type, exc_value, traceback)
 
     async def on_open(self):
+        channel = ChannelDefault(conn, server.config(), server.assistant())
+        conn.setAttachment(channel)
         return await self.server.__aenter__()
 
     async def on_error(self):

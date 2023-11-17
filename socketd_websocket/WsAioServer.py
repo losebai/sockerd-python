@@ -6,7 +6,7 @@ from websockets import broadcast
 from typing import Optional, Type, Union, Callable, Awaitable, Any
 
 from socketd.transport.server.ServerBase import ServerBase
-from WsAioChannelAssistant import WsAioChannelAssistant
+from .WsAioChannelAssistant import WsAioChannelAssistant
 from socketd.core.config.ServerConfig import ServerConfig
 
 log = logger.opt()
@@ -25,7 +25,6 @@ class WsAioServer(ServerBase):
             self.ws_handler: Union = ws_handler
         self.__loop = asyncio.get_event_loop()
         self.server: Serve = None
-        self.ws_server: WebSocketServer = self.server.ws_server
         self.stop = asyncio.Future()  # set this future to exit the server
 
     def start(self) -> 'WsAioServer':
@@ -33,15 +32,15 @@ class WsAioServer(ServerBase):
             raise Exception("Server started")
         else:
             self.isStarted = True
-        if self.config.getHost() is not None:
-            self.server = Serve(self.ws_handler, host="0.0.0.0", port=self.config.getPort(),
-                                ssl=self.config.getSslContext())
+        if self._config.getHost() is not None:
+            self.server = Serve(self.ws_handler, host="0.0.0.0", port=self._config.getPort(),
+                                ssl=self._config.getSslContext())
         else:
-            self.server = Serve(self.ws_handler, host=self.config.getHost(), port=self.config.getPort(),
-                                ssl=self.config.getSslContext())
+            self.server = Serve(self.ws_handler, host=self._config.getHost(), port=self._config.getPort(),
+                                ssl=self._config.getSslContext())
 
         self.server = self.__loop.run_until_complete(self.server)
-        log.info("Server started: {server=" + self.config.getLocalUrl() + "}")
+        log.info("Server started: {server=" + self._config.getLocalUrl() + "}")
         return self
 
     def message_all(self, message: str):

@@ -1,7 +1,7 @@
 from typing import Callable
 from socketd.core.config.ServerConfig import ServerConfig
-from ...core.Processor import Processor
-from ...core.Listener import Listener
+from socketd.core.Processor import Processor
+from socketd.core.Listener import Listener
 
 
 class Server:

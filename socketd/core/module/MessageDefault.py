@@ -1,4 +1,4 @@
-from Message import Message
+from .Message import Message
 from ..Costants import Constants, Flag
 
 
@@ -14,16 +14,17 @@ class MessageDefault(Message):
 
     def set_flag(self, flag):
         self.flag = flag
+        return self
 
-    def sid(self, sid):
+    def set_sid(self, sid):
         self.sid = sid
         return self
 
-    def topic(self, topic):
+    def set_topic(self, topic):
         self.topic = topic
         return self
 
-    def entity(self, entity):
+    def set_entity(self, entity):
         self.entity = entity
         return self
 

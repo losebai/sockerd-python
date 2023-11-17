@@ -1,8 +1,8 @@
 import pickle
 
-from typing import Callable
+from typing import Callable, Generator
 from io import BytesIO
-from Codec import Codec
+from .Codec import Codec
 from socketd.core.module.Frame import Frame
 from socketd.core.module.MessageDefault import MessageDefault
 from socketd.core.module.EntityDefault import EntityDefault
@@ -10,7 +10,7 @@ from socketd.core.Costants import Flag
 from socketd.core.config.Config import Config
 
 
-class CodecByteBuffer(Codec[BytesIO, BytesIO]):
+class CodecByteBuffer(Codec):
     def __init__(self, config):
         self.config = config
 
@@ -105,7 +105,7 @@ class CodecByteBuffer(Codec[BytesIO, BytesIO]):
                 data = buffer.read(dataRealSize)
 
             message = MessageDefault().sid(sid).topic(topic).entity(
-                EntityDefault().metaString(metaString).data(data)
+                EntityDefault().metaString(metaString).set_data(data)
             )
             message.flag = Flag.of(flag)
             return Frame(message.flag, message)

@@ -1,17 +1,17 @@
-import io
 import socket
-from typing import Any, Dict, Optional
-from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 from abc import ABC, abstractmethod
-from  module.Message import Message
-from module.Frame import Frame
-from Costants import Flag
-from config.Config import Config
-from Session import Session
+
+from socketd.core.Costants import Flag
+from socketd.core.Session import Session
+from socketd.core.SessionDefault import SessionDefault
+from socketd.core.config.Config import Config
+from socketd.core.module.Frame import Frame
+from socketd.core.module.MessageDefault import MessageDefault
 
 
-class ChannelDefault('ChannelBase', 'Channel'):
-    def __init__(self, source: S, config: 'Config', assistant: 'ChannelAssistant'):
+class ChannelDefault(ChannelBase, Channel):
+    def __init__(self, source, config: 'Config', assistant: 'ChannelAssistant'):
         super().__init__(config)
         self.source = source
         self.assistant = assistant
@@ -40,7 +40,7 @@ class ChannelDefault('ChannelBase', 'Channel'):
                 self.acceptor_map[message.sid] = acceptor
 
             if message.entity is not None:
-                with message.entity.data as ins:
+                with message.entity.set_data as ins:
                     if message.entity.data_size > Config.MAX_SIZE_FRAGMENT:
                         fragment_index = 0
                         while True:

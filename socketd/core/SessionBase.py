@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Any, Dict
-from Session import Session
-from Channel import Channel
+from .Session import Session
+from .Channel import Channel
 
 
 class SessionBase(Session, ABC):

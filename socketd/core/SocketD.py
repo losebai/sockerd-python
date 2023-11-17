@@ -1,7 +1,13 @@
 from typing import Dict, Optional
-from ..transport.Client import IClient
-from socketd.transport.client.ClientFactory import ClientFactory
 from urllib.parse import urlparse
+
+from socketd.core.config.ClientConfig import ClientConfig
+from socketd.core.config.ServerConfig import ServerConfig
+from socketd.transport.client.Client import Client
+from socketd.transport.client.ClientFactory import ClientFactory
+from socketd.transport.server.Server import Server
+from socketd.transport.server.ServerFactory import ServerFactory
+from socketd_websocket.WsAioFactoy import WsAioFactory
 
 
 class SocketD:
@@ -13,8 +19,7 @@ class SocketD:
     server_factory_map: Dict[str, ServerFactory] = {}
 
     @staticmethod
-    def __load_factories(factory_class: type, factory_map: Dict[str, factory_class]) -> None:
-        factories = list(factory_class().__class__.load())
+    def load_factories(factories: list[ClientFactory | ServerFactory], factory_map: Dict[str, object]) -> None:
         for factory in factories:
             for schema in factory.schema():
                 factory_map[schema] = factory
@@ -34,7 +39,7 @@ class SocketD:
         return factory.create_server(server_config)
 
     @staticmethod
-    def create_client(server_url: str) -> IClient:
+    def create_client(server_url: str) -> Client:
         schema = SocketD.__get_schema(server_url)
         if schema is None:
             raise ValueError("Invalid server URL.")
@@ -46,7 +51,6 @@ class SocketD:
         return factory.create_client(client_config)
 
 
-
 # Initialize the client and server factory maps
-SocketD.__load_factories(ClientFactory, SocketD.client_factory_map)
-SocketD.__load_factories(ServerFactory, SocketD.server_factory_map)
+SocketD.load_factories([WsAioFactory()], SocketD.server_factory_map)
+SocketD.load_factories([WsAioFactory()], SocketD.client_factory_map)

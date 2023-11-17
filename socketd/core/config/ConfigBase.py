@@ -1,45 +1,45 @@
-import uuid
 import os
 import ssl
 
 from typing import Callable
-from Config import Config
+from .Config import Config
 from socketd.core.handler.FragmentHandlerDefault import FragmentHandlerDefault
 from socketd.transport.Codec import Codec
+from socketd.transport.CodecByteBuffer import CodecByteBuffer
 
 
 class ConfigBase(Config):
 
     def __init__(self, clientMode: bool):
-        self.clientMode = clientMode
-        self.charset = "UTF-8"
-        self.codec: Codec = Codec()
-        self.idGenerator: Callable = uuid.uuid4
-        self.fragmentHandler: FragmentHandlerDefault = FragmentHandlerDefault()
-        self.sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        self.executor = None
-        self.coreThreads = os.cpu_count() * 2
-        self.maxThreads = self.coreThreads * 8
-        self.replyTimeout = 3000
-        self.maxRequests = 10
-        self.maxUdpSize = 2048
+        self._clientMode = clientMode
+        self._charset = "UTF-8"
+        self._codec: Codec = CodecByteBuffer(self)
+        self._idGenerator: Callable = None
+        self._fragmentHandler: FragmentHandlerDefault = FragmentHandlerDefault()
+        self._sslContext = None
+        self._executor = None
+        self._coreThreads = os.cpu_count() * 2
+        self._maxThreads = self._coreThreads * 8
+        self._replyTimeout = 3000
+        self._maxRequests = 10
+        self._maxUdpSize = 2048
 
     def clientMode(self):
-        return self.clientMode
+        return self._clientMode
 
     def getCharset(self):
-        return self.charset
+        return self._charset
 
     def charset(self, charset):
-        self.charset = charset
+        self._charset = charset
         return self
 
     def getCodec(self):
-        return self.codec
+        return self._codec
 
     def codec(self, codec):
         assert codec is None
-        self.codec = codec
+        self._codec = codec
         return self
 
     def getFragmentHandler(self):
@@ -47,62 +47,63 @@ class ConfigBase(Config):
 
     def fragmentHandler(self, fragmentHandler):
         assert fragmentHandler is None
-        self.fragmentHandler = fragmentHandler
+        self._fragmentHandler = fragmentHandler
         return self
 
     def getIdGenerator(self):
-        return self.idGenerator
+        return self._idGenerator
 
-    def idGenerator(self, idGenerator):
-        assert idGenerator is None
-        self.idGenerator = idGenerator
+    def idGenerator(self, _idGenerator):
+        # assert _idGenerator is None
+        self._idGenerator = _idGenerator
         return self
 
     def getSslContext(self):
-        return self.sslContext
+        return self._sslContext
 
     def sslContext(self, localhost_pem: str):
-        self.sslContext.load_cert_chain(localhost_pem)
+        self._sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        self._sslContext.load_cert_chain(localhost_pem)
         return self
 
     def getExecutor(self):
-        return self.executor
+        return self._executor
 
     def executor(self, executor):
-        self.executor = executor
+        self._executor = executor
         return self
 
     def getCoreThreads(self):
-        return self.coreThreads
+        return self._coreThreads
 
     def coreThreads(self, coreThreads):
-        self.coreThreads = coreThreads
+        self._coreThreads = coreThreads
         return self
 
     def getMaxThreads(self):
-        return self.maxThreads
+        return self._maxThreads
 
     def maxThreads(self, maxThreads):
-        self.maxThreads = maxThreads
+        self._maxThreads = maxThreads
         return self
 
     def getReplyTimeout(self):
-        return self.replyTimeout
+        return self._replyTimeout
 
     def replyTimeout(self, replyTimeout):
-        self.replyTimeout = replyTimeout
+        self._replyTimeout = replyTimeout
         return self
 
     def getMaxRequests(self):
-        return self.maxRequests
+        return self._maxRequests
 
     def maxRequests(self, maxRequests):
-        self.maxRequests = maxRequests
+        self._maxRequests = maxRequests
         return self
 
     def getMaxUdpSize(self):
-        return self.maxUdpSize
+        return self._maxUdpSize
 
     def maxUdpSize(self, maxUdpSize):
-        self.maxUdpSize = maxUdpSize
+        self._maxUdpSize = maxUdpSize
         return self

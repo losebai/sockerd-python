@@ -2,14 +2,14 @@ import asyncio
 
 from abc import ABC
 
-from SessionBase import SessionBase
-from Channel import Channel
-from Handshake import Handshake
-from module.Entity import Entity
-from module.Message import Message
-from module.Frame import Frame
-from Costants import Flag, Function
-from module.MessageDefault import MessageDefault
+from .SessionBase import SessionBase
+from .Channel import Channel
+from .Handshake import Handshake
+from .module.Entity import Entity
+from .module.Message import Message
+from .module.Frame import Frame
+from .Costants import Flag, Function
+from .module.MessageDefault import MessageDefault
 
 
 class SessionDefault(SessionBase, ABC):

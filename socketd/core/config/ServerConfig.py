@@ -1,4 +1,4 @@
-from ConfigBase import ConfigBase
+from .ConfigBase import ConfigBase
 
 
 class ServerConfig(ConfigBase):
@@ -24,6 +24,7 @@ class ServerConfig(ConfigBase):
 
     def setPort(self, port):
         self.port = port
+        return self
 
     def getLocalUrl(self):
         if self.host:

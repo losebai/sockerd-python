@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from ClientConnector import ClientConnector
-from ClientBase import ClientBase
+from .ClientConnector import ClientConnector
+from .ClientBase import ClientBase
 
 
 class ClientConnectorBase(ABC, ClientConnector):

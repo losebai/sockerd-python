@@ -1,7 +1,8 @@
 from typing import Dict
 from urllib.parse import urlparse, parse_qsl
-from module.Entity import Entity
-from module.Message import Message
+
+from .module.Entity import EntityMetas
+from .module.Message import Message
 
 class Handshake:
     def __init__(self, message: Message):

@@ -6,7 +6,7 @@ from websockets.protocol import State
 from socketd.transport.ChannelAssistant import ChannelAssistant
 
 
-class WsAioChannelAssistant(ChannelAssistant[WebSocketServer]):
+class WsAioChannelAssistant(ChannelAssistant):
     def __init__(self, config: Config):
         self.config = config
 

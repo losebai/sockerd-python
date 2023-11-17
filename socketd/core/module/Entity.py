@@ -26,4 +26,7 @@ class Entity:
 
 
 class EntityMetas:
-    pass
+    META_SOCKETD_VERSION = "SocketD-Version"
+    META_DATA_LENGTH = "Data-Length"
+    META_DATA_FRAGMENT_IDX = "Data-Fragment-Idx"
+    META_DATA_DISPOSITION_FILENAME = "Data-Disposition-Filename"
