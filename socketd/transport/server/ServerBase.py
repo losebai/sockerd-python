@@ -1,6 +1,7 @@
 from .Server import Server
 from socketd.core.config.ServerConfig import ServerConfig
 from socketd.core.ProcessorDefault import ProcessorDefault
+from socketd.transport.ChannelAssistant import ChannelAssistant
 
 
 class ServerBase(Server):
@@ -11,7 +12,7 @@ class ServerBase(Server):
     def __init__(self, config, assistant):
         self._processor = ProcessorDefault()
         self._config: ServerConfig = config
-        self._assistant = assistant
+        self._assistant: ChannelAssistant = assistant
         self.isStarted = False
 
     def assistant(self):

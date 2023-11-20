@@ -19,17 +19,17 @@ class ProcessorDefault(Processor, ABC):
             self.listener = listener
 
     def on_receive(self, channel, frame):
-        self.log.trace("{}", frame)
+        self.log.trace("{on_receive}", frame)
 
-        if frame.getFlag() == Flag.Connect:
+        if frame.get_flag() == Flag.Connect:
             connectMessage = frame.getMessage()
             channel.setHandshake(Handshake(connectMessage))
             channel.sendConnack(connectMessage)
             self.on_open(channel.getSession())
-        elif frame.getFlag() == Flag.Connack:
+        elif frame.get_flag() == Flag.Connack:
             message = frame.getMessage()
             channel.setHandshake(Handshake(message))
-            self.on_open(channel.getSession())
+            self.on_open(channel.g())
         else:
             if channel.getHandshake() is None:
                 channel.close()
@@ -39,16 +39,16 @@ class ProcessorDefault(Processor, ABC):
             channel.setLiveTime()
 
             try:
-                if frame.getFlag() == Flag.Ping:
+                if frame.get_flag() == Flag.Ping:
                     channel.sendPong()
-                elif frame.getFlag() == Flag.Pong:
+                elif frame.get_flag() == Flag.Pong:
                     pass
-                elif frame.getFlag() == Flag.Close:
+                elif frame.get_flag() == Flag.Close:
                     channel.close()
                     self.on_close(channel.getSession())
-                elif frame.getFlag() in [Flag.Message, Flag.Request, Flag.Subscribe]:
+                elif frame.get_flag() in [Flag.Message, Flag.Request, Flag.Subscribe]:
                     self.on_receive_do(channel, frame, False)
-                elif frame.getFlag() in [Flag.Reply, Flag.ReplyEnd]:
+                elif frame.get_flag() in [Flag.Reply, Flag.ReplyEnd]:
                     self.on_receive_do(channel, frame, True)
                 else:
                     channel.close()
@@ -60,7 +60,7 @@ class ProcessorDefault(Processor, ABC):
         fragmentIdxStr = frame.getMessage().getEntity().getMeta(EntityMetas.META_DATA_FRAGMENT_IDX)
         if fragmentIdxStr is not None:
             index = int(fragmentIdxStr)
-            frameNew = channel.getConfig().getFragmentHandler().aggrFragment(channel, index, frame)
+            frameNew = channel.getConfig().get_fragment_handler().aggrFragment(channel, index, frame)
 
             if frameNew is None:
                 return

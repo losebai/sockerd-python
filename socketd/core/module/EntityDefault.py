@@ -5,77 +5,77 @@ from .Entity import Entity
 
 class EntityDefault(Entity, ABC):
     def __init__(self):
-        self.metaMap = None
-        self.metaString = "DEF_META_STRING"
-        self.metaStringChanged = False
+        self.meta_map = None
+        self.meta_string = "_dEF__mET_a__sTRING"
+        self.meta_stringChanged = False
         self.data = None
-        self.dataSize = 0
+        self.data_size = 0
 
-    def set_metaString(self, metaString):
-        self.metaMap = None
-        self.metaString = metaString
-        self.metaStringChanged = False
+    def set_meta_string(self, meta_string):
+        self.meta_map = None
+        self.meta_string = meta_string
+        self.meta_stringChanged = False
         return self
 
-    def getMetaString(self):
-        if self.metaStringChanged:
+    def get_meta_string(self):
+        if self.meta_stringChanged:
             buf = ""
-            for name, val in self.getMetaMap().items():
+            for name, val in self.get_meta_map().items():
                 buf += f"{name}={val}&"
             if len(buf) > 0:
                 buf = buf[:-1]
-            self.metaString = buf
-            self.metaStringChanged = False
-        return self.metaString
+            self.meta_string = buf
+            self.meta_stringChanged = False
+        return self.meta_string
 
-    def set_metaMap(self, metaMap):
-        self.metaMap = metaMap
-        self.metaString = None
-        self.metaStringChanged = True
+    def set_meta_map(self, meta_map):
+        self.meta_map = meta_map
+        self.meta_string = None
+        self.meta_stringChanged = True
         return self
 
-    def getMetaMap(self):
-        if self.metaMap is None:
-            self.metaMap = {}
-            self.metaStringChanged = False
-            if self.metaString:
-                for kvStr in self.metaString.split("&"):
-                    kv = kvStr.split("=")
+    def get_meta_map(self):
+        if self.meta_map is None:
+            self.meta_map = {}
+            self.meta_stringChanged = False
+            if self.meta_string:
+                for kv_str in self.meta_string.split("&"):
+                    kv = kv_str.split("=")
                     if len(kv) > 1:
-                        self.metaMap[kv[0]] = kv[1]
+                        self.meta_map[kv[0]] = kv[1]
                     else:
-                        self.metaMap[kv[0]] = ""
-        return self.metaMap
+                        self.meta_map[kv[0]] = ""
+        return self.meta_map
 
     def set_meta(self, name, val):
-        self.putMeta(name, val)
+        self.put_meta(name, val)
         return self
 
-    def putMeta(self, name, val):
-        self.getMetaMap()[name] = val
-        self.metaStringChanged = True
+    def put_meta(self, name, val):
+        self.get_meta_map()[name] = val
+        self.meta_stringChanged = True
 
-    def getMeta(self, name):
-        return self.getMetaMap().get(name)
+    def get_meta(self, name):
+        return self.get_meta_map().get(name)
 
-    def getMetaOrDefault(self, name, default_val):
-        return self.getMetaMap().get(name, default_val)
+    def get_metaOr_default(self, name, default_val):
+        return self.get_meta_map().get(name, default_val)
 
     def set_data(self, data):
         self.data = data
-        self.dataSize = len(data)
+        self.data_size = len(data)
         return self
 
-    def getData(self):
+    def get_data(self):
         return self.data
 
-    def getDataAsString(self):
-        return str(self.data, 'utf-8')  # Assuming data is of type bytes
+    def get_data_as_string(self):
+        return str(self.data, 'utf-8')  # _assuming data is of type bytes
 
-    def getDataSize(self):
-        return self.dataSize
+    def get_data_size(self):
+        return self.data_size
 
     def __str__(self):
-        return f"Entity(meta='{self.getMetaString()}', data=byte[{self.dataSize}])"
+        return f"Entity(meta='{self.get_meta_string()}', data=byte[{self.data_size}])"
 
 

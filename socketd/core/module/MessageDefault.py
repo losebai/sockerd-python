@@ -1,3 +1,4 @@
+from .Entity import Entity
 from .Message import Message
 from ..Costants import Constants, Flag
 
@@ -6,7 +7,7 @@ class MessageDefault(Message):
     def __init__(self):
         self.sid = Constants.DEF_SID
         self.topic = Constants.DEF_TOPIC
-        self.entity = None
+        self.entity: Entity = None
         self.flag = Flag.Unknown
 
     def get_flag(self):

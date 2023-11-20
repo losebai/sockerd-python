@@ -1,7 +1,9 @@
 import time
+import asyncio
 from abc import ABC
 
 from socketd.core.Channel import Channel
+from socketd.core.Frames import Frames
 
 
 class ChannelBase(Channel, ABC):
@@ -20,7 +22,7 @@ class ChannelBase(Channel, ABC):
         self.attachments[name] = val
 
     def is_closed(self):
-        return self.isClosed
+        return self.is_closed()
 
     def get_requests(self):
         return self.requests
@@ -38,25 +40,25 @@ class ChannelBase(Channel, ABC):
         return self.liveTime
 
     def send_connect(self, uri):
-        # Implement the send method based on your requirements
-        pass
+        self.send(Frames.connectFrame(self.config.get_id_generator().generate(), uri), None)
 
     def send_connack(self, connect_message):
-        # Implement the send method based on your requirements
-        pass
+        self.send(Frames.connackFrame(connect_message), None)
 
     def send_ping(self):
-        # Implement the send method based on your requirements
-        pass
+        self.send(Frames.pingFrame(), None)
 
     def send_pong(self):
-        # Implement the send method based on your requirements
-        pass
+        self.send(Frames.pongFrame(), None)
 
     def send_close(self):
-        # Implement the send method based on your requirements
-        pass
+        self.send(Frames.closeFrame(), None)
 
-    def close(self):
+    async def close(self, code: int = 1000,
+                    reason: str = "", ):
+        await self.close(code, reason)
         self.isClosed = True
         self.attachments.clear()
+
+    def get_config(self) -> 'Config':
+        return self.config

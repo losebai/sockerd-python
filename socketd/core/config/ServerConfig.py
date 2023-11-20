@@ -10,7 +10,7 @@ class ServerConfig(ConfigBase):
         self.readBufferSize = 512
         self.writeBufferSize = 512
 
-    def getSchema(self):
+    def get_schema(self):
         return self.schema
 
     def getHost(self):

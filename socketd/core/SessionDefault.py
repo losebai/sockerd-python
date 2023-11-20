@@ -54,34 +54,18 @@ class SessionDefault(SessionBase, ABC):
             raise Exception(e)
         finally:
             self.channel.remove_acceptor(message.getSid())
-            self.channel.get_requests().denominator()
+            # self.channel.get_requests().denominator()
 
-    def sendAndSubscribe(self, topic: str, content: Entity, consumer: Function[Entity]):
+    def sendAndSubscribe(self, topic: str, content: Entity, consumer: Function):
         message = MessageDefault().sid(self.generate_id()).topic(topic).entity(content)
-        self.channel.send(Frame(Flag.Subscribe, message), AcceptorSubscribe(consumer))
+        self.channel.send(Frame(Flag.Subscribe, message), None)
 
     def reply(self, from_msg: Message, content: Entity):
-        self.channel.send(Frame(Flag.Reply, MessageDefault().sid(from_msg.getSid()).entity(content)), None)
+        self.channel.send(Frame(Flag.Reply, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
     def replyEnd(self, from_msg: Message, content: Entity):
-        self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().sid(from_msg.getSid()).entity(content)), None)
+        self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
     def close(self):
-        self.channel.close()
+        self.channel.send_close()
 
-
-class AcceptorRequest:
-    def __init__(self, future: CompletableFuture, timeout: int):
-        self.future = future
-        self.timeout = timeout
-
-    def run(self):
-        self.future.completeExceptionally(IOException("Request canceled or timed out"))
-
-
-class AcceptorSubscribe(Runnable):
-    def __init__(self, consumer: Consumer[Entity]):
-        self.consumer = consumer
-
-    def run(self):
-        pass  # Perform your subscription logic here, e.g., invoking the consumer

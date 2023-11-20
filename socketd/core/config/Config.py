@@ -11,80 +11,80 @@ class Config:
     MAX_SIZE_FRAGMENT = 1024 * 1024 * 16
 
 
-    def clientMode(self):
+    def client_mode(self):
         """
         返回一个布尔值，指示配置是否为客户端模式。
         """
         pass
 
-    def getSchema(self):
+    def get_schema(self):
         """
         返回协议架构。
         """
         pass
 
-    def getCharset(self):
+    def get_charset(self):
         """
         返回字符集。
         """
         pass
 
-    def getCodec(self):
+    def get_codec(self):
         """
         返回编解码器。
         """
         pass
 
-    def getIdGenerator(self):
+    def get_id_generator(self):
         """
         返回ID生成器。
         """
         pass
 
-    def getFragmentHandler(self):
+    def get_fragment_handler(self):
         """
         返回分片处理器。
         """
         pass
 
-    def getSslContext(self):
+    def get_ssl_context(self):
         """
-        返回SSL上下文。
+        返回_s_sL上下文。
         """
         pass
 
-    def getExecutor(self):
+    def get_executor(self):
         """
         返回执行器（第一优先级，某些底层可能不支持）。
         """
         pass
 
-    def getCoreThreads(self):
+    def get_core_threads(self):
         """
         返回核心线程数（第二优先级）。
         """
         pass
 
-    def getMaxThreads(self):
+    def get_max_threads(self):
         """
         返回最大线程数。
         """
         pass
 
-    def getReplyTimeout(self):
+    def get_reply_timeout(self):
         """
         返回答复超时时间（单位：毫秒）。
         """
         pass
 
-    def getMaxRequests(self):
+    def get_max_requests(self):
         """
         返回允许的最大请求数。
         """
         pass
 
-    def getMaxUdpSize(self):
+    def get_max_udp_size(self):
         """
-        返回允许的最大UDP包大小。
+        返回允许的最大_uDP包大小。
         """
         pass

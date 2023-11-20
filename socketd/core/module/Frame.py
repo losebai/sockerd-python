@@ -3,6 +3,7 @@ from ..Costants import Flag
 
 
 class Frame:
+
     def __init__(self, flag: Flag, message: Message):
         self.flag = flag
         self.message = message

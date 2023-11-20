@@ -1,10 +1,13 @@
 from typing import Any
 import socket
+
+from websockets import WebSocketServerProtocol
+
 from .module.Message import Message
 from abc import ABC, abstractmethod
 
 
-class Channel(ABC):
+class Channel:
     @abstractmethod
     def get_attachment(self, name: str) -> Any:
         pass
@@ -42,11 +45,11 @@ class Channel(ABC):
         pass
 
     @abstractmethod
-    def get_remote_address(self) -> socket.Address:
+    def get_remote_address(self) -> str:
         pass
 
     @abstractmethod
-    def get_local_address(self) -> socket.Address:
+    def get_local_address(self) -> str:
         pass
 
     @abstractmethod

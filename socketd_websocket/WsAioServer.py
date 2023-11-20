@@ -3,26 +3,19 @@ from loguru import logger
 
 from websockets.server import WebSocketServer, serve as Serve, WebSocketServerProtocol
 from websockets import broadcast
-from typing import Optional, Type, Union, Callable, Awaitable, Any
 
 from socketd.transport.server.ServerBase import ServerBase
 from .WsAioChannelAssistant import WsAioChannelAssistant
 from socketd.core.config.ServerConfig import ServerConfig
+from .impl.AIOWebSocketServerImpl import AIOWebSocketServerImpl
 
 log = logger.opt()
 
 
 class WsAioServer(ServerBase):
 
-    def __init__(self, config: ServerConfig, ws_handler: Union[
-        Callable[[WebSocketServerProtocol], Awaitable[Any]],
-        Callable[[WebSocketServerProtocol, str], Awaitable[Any]],  # deprecated
-    ] = None):
+    def __init__(self, config: ServerConfig):
         super().__init__(config, WsAioChannelAssistant(config))
-        if ws_handler is None:
-            self.ws_handler: Union = ws_handler
-        else:
-            self.ws_handler: Union = ws_handler
         self.__loop = asyncio.get_event_loop()
         self.server: Serve = None
         self.stop = asyncio.Future()  # set this future to exit the server
@@ -33,13 +26,14 @@ class WsAioServer(ServerBase):
         else:
             self.isStarted = True
         if self._config.getHost() is not None:
-            self.server = Serve(self.ws_handler, host="0.0.0.0", port=self._config.getPort(),
-                                ssl=self._config.getSslContext())
+            self.server = AIOWebSocketServerImpl(host="0.0.0.0", port=self._config.getPort(),
+                                                 ws_server=self,
+                                                 ssl=self._config.get_ssl_context())
         else:
-            self.server = Serve(self.ws_handler, host=self._config.getHost(), port=self._config.getPort(),
-                                ssl=self._config.getSslContext())
-
-        self.server = self.__loop.run_until_complete(self.server)
+            self.server = AIOWebSocketServerImpl(host=self._config.getHost(), port=self._config.getPort(),
+                                                 ws_server=self,
+                                                 ssl=self._config.get_ssl_context())
+        self.__loop.run_until_complete(self.server)
         log.info("Server started: {server=" + self._config.getLocalUrl() + "}")
         return self
 

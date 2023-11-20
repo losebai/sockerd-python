@@ -3,7 +3,7 @@ import uuid
 import time
 from abc import ABC
 
-from websockets.legacy.client import Connect, WebSocketClientProtocol
+from websockets.legacy.client import Connect
 
 from socketd.core.Listener import Listener
 from socketd.core.SocketD import SocketD
@@ -38,13 +38,6 @@ def main():
     server = SocketD.create_server(ServerConfig("ws").setPort(7779))
     server_session = server.config(idGenerator).listen(
         SimpleListener()).start()
-
-    time.sleep(3)
-    #
-    client_session: WebSocketClientProtocol = SocketD.create_client("ws://127.0.0.1:7779") \
-        .config(idGenerator).open()
-
-    asyncio.get_event_loop().run_until_complete(client_session.send("org.noear.socketd.\nloser.bai".encode()))
 
     asyncio.get_event_loop().run_forever()
 

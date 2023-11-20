@@ -1,3 +1,5 @@
+import asyncio
+
 from loguru import logger
 
 from socketd.transport.client.ClientBase import ClientBase
@@ -13,10 +15,10 @@ class WsAioClient(ClientBase):
         super().__init__(config, WsAioChannelAssistant(config))
         self.client = None
         self.log = logger.opt()
+        self.__loop = asyncio.get_event_loop()
 
     def open(self):
         client = WsAioClientConnector(self)
-        client.connect()
         self.log.info(f"open {self._config.url}")
-        self.client = Connect(self._config.url)
+        self.client = client.connect()
         return self.client

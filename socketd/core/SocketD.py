@@ -13,7 +13,7 @@ from socketd_websocket.WsAioFactoy import WsAioFactory
 class SocketD:
     @staticmethod
     def version() -> str:
-        return "2.0"
+        return "0.1"
 
     client_factory_map: Dict[str, ClientFactory] = {}
     server_factory_map: Dict[str, ServerFactory] = {}

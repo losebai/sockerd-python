@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 from typing import Callable
 
+from websockets import WebSocketClientProtocol
+
 
 class Client(ABC):
 
@@ -18,4 +20,4 @@ class Client(ABC):
     def listen(self, listener: Callable) -> 'Client': ...
 
     @abstractmethod
-    def open(self): ...
+    def open(self) -> WebSocketClientProtocol: ...
