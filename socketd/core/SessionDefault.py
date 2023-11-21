@@ -41,7 +41,7 @@ class SessionDefault(SessionBase, ABC):
         message = MessageDefault().set_sid(self.generate_id()).set_topic(topic).set_entity(content)
         await self.channel.send(Frame(Flag.Message, message), None)
 
-    def send_and_request(self, topic: str, content: Entity, timeout: int) -> Entity:
+    async def send_and_request(self, topic: str, content: Entity, timeout: int) -> Entity:
         # todo 不可用
         if self.channel.get_requests().get() > self.channel.get_config().getMaxRequests():
             raise Exception("Sending too many requests: " + str(self.channel.get_requests().get()))
@@ -58,15 +58,15 @@ class SessionDefault(SessionBase, ABC):
             self.channel.remove_acceptor(message.getSid())
             # self.channel.get_requests().denominator()
 
-    def send_and_subscribe(self, topic: str, content: Entity, consumer: Function):
+    async def send_and_subscribe(self, topic: str, content: Entity, consumer: Function):
         message = MessageDefault().sid(self.generate_id()).topic(topic).entity(content)
-        self.channel.send(Frame(Flag.Subscribe, message), None)
+        await self.channel.send(Frame(Flag.Subscribe, message), None)
 
-    def reply(self, from_msg: Message, content: Entity):
-        self.channel.send(Frame(Flag.Reply, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
+    async def reply(self, from_msg: Message, content: Entity):
+        await self.channel.send(Frame(Flag.Reply, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
-    def reply_end(self, from_msg: Message, content: Entity):
-        self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
+    async def reply_end(self, from_msg: Message, content: Entity):
+        await self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
-    def close(self):
-        self.channel.send_close()
+    async def close(self):
+        await self.channel.send_close()

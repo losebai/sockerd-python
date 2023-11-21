@@ -21,7 +21,7 @@ class CodecByteBuffer(Codec):
             # length
             target.put_int(_len)
             # flag
-            target.write(frame.flag.value)
+            target.put_int(frame.flag.value)
             target.flush()
 
             return target

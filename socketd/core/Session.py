@@ -70,3 +70,6 @@ class Session(abc.ABC):
     @abc.abstractmethod
     def reply_end(self, from_msg: Message, content: Entity) -> None:
         pass
+
+    def close(self):
+        pass

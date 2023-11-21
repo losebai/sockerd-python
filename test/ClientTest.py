@@ -22,7 +22,7 @@ class SimpleListener(Listener, ABC):
             session.replyEnd(message, StringEntity("test"))
         elif message.is_subscribe():
             session.replyEnd(message, StringEntity("test"))
-        print(Message)
+        print("on_message")
 
     def on_close(self, session):
         pass
@@ -46,8 +46,9 @@ async def main():
         .config(idGenerator).open()
 
     await client_session.send("demo", StringEntity("test"))
-    await client_session.send("demo2", StringEntity("test"))
+    # await client_session.send("demo2", StringEntity("test"))
     # asyncio.get_event_loop().run_forever()
+    await client_session.close()
     await server_session.stop
 
 
