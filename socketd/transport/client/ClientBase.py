@@ -27,7 +27,10 @@ class ClientBase(Client, ABC):
             self._heartbeat_handler = handler
         return self
 
-    def getConfig(self):
+    def get_heartbeatHandler(self):
+        return self._heartbeat_handler
+
+    def get_config(self):
         return self._config
 
     def config(self, consumer):

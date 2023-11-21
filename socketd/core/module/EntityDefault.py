@@ -1,4 +1,5 @@
 from abc import ABC
+import pickle
 
 from .Entity import Entity
 
@@ -8,7 +9,7 @@ class EntityDefault(Entity, ABC):
         self.meta_map = None
         self.meta_string = "_dEF__mET_a__sTRING"
         self.meta_stringChanged = False
-        self.data = None
+        self.data: bytes = None
         self.data_size = 0
 
     def set_meta_string(self, meta_string):
@@ -62,7 +63,10 @@ class EntityDefault(Entity, ABC):
         return self.get_meta_map().get(name, default_val)
 
     def set_data(self, data):
-        self.data = data
+        if type(data) != bytes:
+            self.data = pickle.loads(data)
+        else:
+            self.data = data
         self.data_size = len(data)
         return self
 

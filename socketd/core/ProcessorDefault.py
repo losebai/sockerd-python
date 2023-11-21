@@ -1,11 +1,13 @@
 from abc import ABC
 from loguru import logger
 
+from .Channel import Channel
 from .Handshake import Handshake
 from .Processor import Processor
 from .Costants import Flag
 from .SimpleListener import SimpleListener
 from .module.Entity import EntityMetas
+from .module.Frame import Frame
 
 
 class ProcessorDefault(Processor, ABC):
@@ -18,49 +20,49 @@ class ProcessorDefault(Processor, ABC):
         if listener is not None:
             self.listener = listener
 
-    def on_receive(self, channel, frame):
+    async def on_receive(self, channel: Channel, frame):
         self.log.trace("{on_receive}", frame)
 
         if frame.get_flag() == Flag.Connect:
-            connectMessage = frame.getMessage()
-            channel.setHandshake(Handshake(connectMessage))
-            channel.sendConnack(connectMessage)
-            self.on_open(channel.getSession())
+            connectMessage = frame.get_message()
+            channel.set_handshake(Handshake(connectMessage))
+            await channel.send_connack(connectMessage)
+            self.on_open(channel.get_session())
         elif frame.get_flag() == Flag.Connack:
             message = frame.getMessage()
-            channel.setHandshake(Handshake(message))
-            self.on_open(channel.g())
+            channel.set_handshake(Handshake(message))
+            self.on_open(channel.get_session())
         else:
-            if channel.getHandshake() is None:
-                channel.close()
-                self.log.warning("Channel handshake is None, sessionId={}", channel.getSession().getSessionId())
+            if channel.get_handshake() is None:
+                await channel.close()
+                self.log.warning("Channel handshake is None, sessionId={}", channel.get_session().get_session_id())
                 return
 
-            channel.setLiveTime()
+            channel.set_live_time()
 
             try:
                 if frame.get_flag() == Flag.Ping:
-                    channel.sendPong()
+                    await channel.send_pong()
                 elif frame.get_flag() == Flag.Pong:
                     pass
                 elif frame.get_flag() == Flag.Close:
-                    channel.close()
-                    self.on_close(channel.getSession())
+                    await channel.close()
+                    self.on_close(channel.get_session())
                 elif frame.get_flag() in [Flag.Message, Flag.Request, Flag.Subscribe]:
                     self.on_receive_do(channel, frame, False)
                 elif frame.get_flag() in [Flag.Reply, Flag.ReplyEnd]:
                     self.on_receive_do(channel, frame, True)
                 else:
-                    channel.close()
-                    self.on_close(channel.getSession())
+                    await channel.close()
+                    self.on_close(channel.get_session())
             except Exception as e:
-                self.on_error(channel.getSession(), e)
+                self.on_error(channel.get_session(), e)
 
-    def on_receive_do(self, channel, frame, isReply):
-        fragmentIdxStr = frame.getMessage().getEntity().getMeta(EntityMetas.META_DATA_FRAGMENT_IDX)
+    def on_receive_do(self, channel: Channel, frame: Frame, isReply):
+        fragmentIdxStr = frame.get_message().get_entity().get_meta(EntityMetas.META_DATA_FRAGMENT_IDX)
         if fragmentIdxStr is not None:
             index = int(fragmentIdxStr)
-            frameNew = channel.getConfig().get_fragment_handler().aggrFragment(channel, index, frame)
+            frameNew = channel.get_config().get_fragment_handler().aggrFragment(channel, index, frame)
 
             if frameNew is None:
                 return
@@ -70,7 +72,7 @@ class ProcessorDefault(Processor, ABC):
         if isReply:
             channel.retrieve(frame)
         else:
-            self.on_message(channel.getSession(), frame.getMessage())
+            self.on_message(channel.get_session(), frame.get_message())
 
     def on_open(self, session):
         self.listener.on_open(session)

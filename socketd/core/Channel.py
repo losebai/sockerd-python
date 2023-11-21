@@ -61,27 +61,27 @@ class Channel:
         pass
 
     @abstractmethod
-    def send_connect(self, url: str) -> None:
+    async def send_connect(self, url: str) -> None:
         pass
 
     @abstractmethod
-    def send_connack(self, connect_message: Message) -> None:
+    async def send_connack(self, connect_message: Message) -> None:
         pass
 
     @abstractmethod
-    def send_ping(self) -> None:
+    async def send_ping(self) -> None:
         pass
 
     @abstractmethod
-    def send_pong(self) -> None:
+    async def send_pong(self) -> None:
         pass
 
     @abstractmethod
-    def send_close(self) -> None:
+    async def send_close(self) -> None:
         pass
 
     @abstractmethod
-    def send(self, frame: 'Frame', acceptor: 'Acceptor') -> None:
+    async def send(self, frame: 'Frame', acceptor: 'Acceptor') -> None:
         pass
 
     @abstractmethod
@@ -90,4 +90,7 @@ class Channel:
 
     @abstractmethod
     def get_session(self) -> 'Session':
+        pass
+
+    async def close(self):
         pass

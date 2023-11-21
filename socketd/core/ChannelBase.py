@@ -39,20 +39,20 @@ class ChannelBase(Channel, ABC):
     def get_live_time(self):
         return self.liveTime
 
-    def send_connect(self, uri):
-        self.send(Frames.connectFrame(self.config.get_id_generator().generate(), uri), None)
+    async def send_connect(self, uri):
+        await self.send(Frames.connectFrame(self.config.get_id_generator()().__str__(), uri), None)
 
-    def send_connack(self, connect_message):
-        self.send(Frames.connackFrame(connect_message), None)
+    async def send_connack(self, connect_message):
+        await self.send(Frames.connackFrame(connect_message), None)
 
-    def send_ping(self):
-        self.send(Frames.pingFrame(), None)
+    async def send_ping(self):
+        await self.send(Frames.pingFrame(), None)
 
-    def send_pong(self):
-        self.send(Frames.pongFrame(), None)
+    async def send_pong(self):
+        await self.send(Frames.pongFrame(), None)
 
-    def send_close(self):
-        self.send(Frames.closeFrame(), None)
+    async def send_close(self):
+        await self.send(Frames.closeFrame(), None)
 
     async def close(self, code: int = 1000,
                     reason: str = "", ):
@@ -62,3 +62,6 @@ class ChannelBase(Channel, ABC):
 
     def get_config(self) -> 'Config':
         return self.config
+
+    def assert_closed(self):
+        assert super().is_closed()

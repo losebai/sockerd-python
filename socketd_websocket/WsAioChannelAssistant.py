@@ -1,4 +1,3 @@
-from io import BytesIO
 
 from socketd.core.Buffer import Buffer
 from socketd.core.config.Config import Config
@@ -13,11 +12,11 @@ class WsAioChannelAssistant(ChannelAssistant):
         self.config = config
 
     async def write(self, source: WebSocketServerProtocol, frame: Frame) -> None:
-        writer = self.config.get_codec().write(frame, lambda l: BytesIO())
-        await source.send(writer)
+        writer: Buffer = self.config.get_codec().write(frame, lambda l: Buffer())
+        await source.send(writer.getbuffer())
 
     def is_valid(self, target: WebSocketServerProtocol) -> bool:
-        return target.state() == State.OPEN
+        return target.state == State.OPEN
 
     async def close(self, target: WebSocketServerProtocol) -> None:
         await target.close()

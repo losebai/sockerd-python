@@ -10,14 +10,14 @@ class Frames:
     @staticmethod
     def connectFrame(sid, url):
         entity = EntityDefault()
-        entity.putMeta("META_SOCKETD_VERSION", SocketD.SocketD.version())
-        return Frame(Flag.Connect, MessageDefault().sid(sid).topic(url).entity(entity))
+        entity.put_meta("META_SOCKETD_VERSION", SocketD.SocketD.version())
+        return Frame(Flag.Connect, MessageDefault().set_sid(sid).set_topic(url).set_entity(entity))
 
     @staticmethod
     def connackFrame(connectMessage):
         entity = EntityDefault()
-        entity.putMeta("META_SOCKETD_VERSION", SocketD.SocketD.version())
-        return Frame(Flag.Connack, MessageDefault().sid(connectMessage.sid).topic(connectMessage.topic).entity(entity))
+        entity.put_meta("META_SOCKETD_VERSION", SocketD.SocketD.version())
+        return Frame(Flag.Connack, MessageDefault().set_sid(connectMessage.sid).set_topic(connectMessage.topic).set_entity(entity))
 
     @staticmethod
     def pingFrame():

@@ -4,6 +4,8 @@ from typing import Callable
 
 from websockets import WebSocketClientProtocol
 
+from socketd.core.Session import Session
+
 
 class Client(ABC):
 
@@ -20,4 +22,4 @@ class Client(ABC):
     def listen(self, listener: Callable) -> 'Client': ...
 
     @abstractmethod
-    def open(self) -> WebSocketClientProtocol: ...
+    def open(self) -> Session: ...

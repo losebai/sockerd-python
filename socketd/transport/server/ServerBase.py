@@ -15,7 +15,7 @@ class ServerBase(Server):
         self._assistant: ChannelAssistant = assistant
         self.isStarted = False
 
-    def assistant(self):
+    def get_assistant(self):
         """
         获取通道助理
         """
@@ -28,6 +28,9 @@ class ServerBase(Server):
         consumer(self._config)
         return self
 
+    def get_config(self):
+        return self._config
+
     def process(self, processor):
         """
         设置处理器
@@ -35,6 +38,9 @@ class ServerBase(Server):
         if processor is not None:
             self._processor = processor
         return self
+
+    def get_process(self):
+        return self._processor
 
     def listen(self, listener):
         """

@@ -10,8 +10,7 @@ class SessionBase(Session, ABC):
         self.attr_map = None
         self.session_id = None
 
-    @property
-    def attr_map(self) -> Dict[str, Any]:
+    def get_attr_map(self) -> Dict[str, Any]:
         if self._attr_map is None:
             self._attr_map = {}
 
@@ -35,20 +34,14 @@ class SessionBase(Session, ABC):
             self._attr_map = {}
         self._attr_map[name] = value
 
-    @property
-    def session_id(self) -> str:
+    def get_session_id(self) -> str:
         if self._session_id is None:
             self._session_id = self.generate_id()
 
         return self._session_id
 
     def generate_id(self) -> str:
-        return self.channel.get_config().id_generator.generate()
+        return self.channel.get_config().get_id_generator()().__str__()
 
-    @attr_map.setter
-    def attr_map(self, value):
-        self._attr_map = value
-
-    @session_id.setter
-    def session_id(self, value):
+    def set_session_id(self, value):
         self._session_id = value

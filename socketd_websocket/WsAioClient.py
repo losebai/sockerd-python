@@ -2,10 +2,13 @@ import asyncio
 
 from loguru import logger
 
+from socketd.core.Channel import Channel
+from socketd.core.Session import Session
+from socketd.core.SessionDefault import SessionDefault
 from socketd.transport.client.ClientBase import ClientBase
 from socketd.core.config.ClientConfig import ClientConfig
+from socketd.transport.client.ClientChannel import ClientChannel
 from .WsAioChannelAssistant import WsAioChannelAssistant
-from websockets.client import connect as Connect
 from .WsAioClientConnector import WsAioClientConnector
 
 
@@ -17,8 +20,9 @@ class WsAioClient(ClientBase):
         self.log = logger.opt()
         self.__loop = asyncio.get_event_loop()
 
-    def open(self):
+    def open(self) -> Session:
         client = WsAioClientConnector(self)
         self.log.info(f"open {self._config.url}")
         self.client = client.connect()
-        return self.client
+        channel: Channel = ClientChannel(client.connect(), client)
+        return SessionDefault(channel)

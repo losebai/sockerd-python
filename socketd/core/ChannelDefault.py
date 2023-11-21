@@ -13,19 +13,18 @@ from socketd.core.module.Frame import Frame
 from socketd.core.module.MessageDefault import MessageDefault
 from socketd.transport.ChannelAssistant import ChannelAssistant
 
-from websockets.server import WebSocketServerProtocol
 
-S = TypeVar("S", bound=WebSocketServerProtocol)
+S = TypeVar("S", bound=WebSocketCommonProtocol)
 
 thread_safe_dict = ThreadSafeDict()
 
 
 class ChannelDefault(ChannelBase):
 
-    def __init__(self, config: Config, assistant: ChannelAssistant,source, *args, **kwargs):
+    def __init__(self, source: S, config: Config, assistant: ChannelAssistant):
         # WebSocketServerProtocol.__init__(self, *args, **kwargs)
         ChannelBase.__init__(self, config)
-        self.source: WebSocketServerProtocol = source
+        self.source: WebSocketCommonProtocol = source
         self.assistant = assistant
         self.acceptorMap = {}
         self.session: Session = None
@@ -42,11 +41,9 @@ class ChannelDefault(ChannelBase):
     def get_local_address(self) -> str:
         return self.assistant.get_local_address(self.source)
 
-    def assert_closed(self):
-        assert super().is_closed()
 
-    def send(self, frame: Frame, acceptor: Function) -> None:
-        self.assert_closed()
+    async def send(self, frame: Frame, acceptor: Function) -> None:
+        # self.assert_closed()
         if frame.get_message() is not None:
             message = frame.get_message()
 
@@ -54,26 +51,25 @@ class ChannelDefault(ChannelBase):
                 self.acceptorMap[message.get_sid()] = acceptor
 
             if message.get_entity() is not None:
-                with message.get_entity().get_data() as ins:
-                    if message.get_entity().get_data_size() > Config.MAX_SIZE_FRAGMENT:
-                        fragmentIndex = thread_safe_dict.set("AtomicReference", 0)
-                        while True:
-                            fragmentEntity = self.get_config().get_fragment_handler().nextFragment(self.get_config(),
-                                                                                                   fragmentIndex,
-                                                                                                   message.get_entity())
-                            if fragmentEntity is not None:
-                                fragmentFrame = Frame(frame.get_flag(), MessageDefault()
-                                                      .flag(frame.get_flag())
-                                                      .sid(message.get_sid())
-                                                      .entity(fragmentEntity))
-                                self.assistant.write(self.source, fragmentFrame)
-                            else:
-                                return
-                    else:
-                        self.assistant.write(self.source, frame)
-                        return
+                if message.get_entity().get_data_size() > Config.MAX_SIZE_FRAGMENT:
+                    fragmentIndex = thread_safe_dict.set("AtomicReference", 0)
+                    while True:
+                        fragmentEntity = self.get_config().get_fragment_handler().nextFragment(self.get_config(),
+                                                                                               fragmentIndex,
+                                                                                               message.get_entity())
+                        if fragmentEntity is not None:
+                            fragmentFrame = Frame(frame.get_flag(), MessageDefault()
+                                                  .flag(frame.get_flag())
+                                                  .sid(message.get_sid())
+                                                  .entity(fragmentEntity))
+                            await self.assistant.write(self.source, fragmentFrame)
+                        else:
+                            return
+                else:
+                    await self.assistant.write(self.source, frame)
+                    return
 
-        self.assistant.write(self.source, frame)
+        await self.assistant.write(self.source, frame)
 
     def retrieve(self, frame: Frame) -> None:
         acceptor = self.acceptorMap.get(frame.get_message().get_sid())

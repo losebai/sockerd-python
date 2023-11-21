@@ -1,7 +1,5 @@
-import pickle
 
-from typing import Callable, Generator
-from io import BytesIO
+from typing import Callable
 from .Codec import Codec
 from socketd.core.module.Frame import Frame
 from socketd.core.module.MessageDefault import MessageDefault
@@ -9,7 +7,6 @@ from socketd.core.module.EntityDefault import EntityDefault
 from socketd.core.Costants import Flag
 from socketd.core.config.Config import Config
 from ..core.Buffer import Buffer
-
 
 class CodecByteBuffer(Codec):
     def __init__(self, config: 'ConfigBase'):
@@ -38,7 +35,7 @@ class CodecByteBuffer(Codec):
 
             # length (flag + sid + topic + metaString + data + int.bytes + \n*3)
             len1 = len(sidB) + len(topicB) + len(
-                metaStringB) + frame.message.get_entity().get_data_size() + 2 * 3 + 2 * 4
+                metaStringB) + frame.message.get_entity().get_data_size() + 1 * 3 + 2 * 4
 
             self.assertSize("sid", len(sidB), Config.MAX_SIZE_SID)
             self.assertSize("topic", len(topicB), Config.MAX_SIZE_TOPIC)
@@ -66,7 +63,8 @@ class CodecByteBuffer(Codec):
             target.write(b'\n')
 
             # data
-            pickle.dump(frame.message.get_entity().get_data(), target)
+            if frame.message.get_entity().get_data() is not None:
+                target.write(frame.message.get_entity().get_data())
             target.flush()
 
             return target
@@ -74,9 +72,7 @@ class CodecByteBuffer(Codec):
     def read(self, buffer: Buffer) -> Frame:
         len0 = buffer.get_int()
 
-        remaining_data = buffer.getbuffer()[buffer.tell():]  # 获取剩余的字节数据
-        remaining_length = len(remaining_data)  # 获取剩余字节数据的长度
-        if len0 > (remaining_length + 4):
+        if len0 > (buffer.remaining() + 4):
             return None
 
         flag = buffer.get_int()  # 取前一位数据
@@ -85,15 +81,16 @@ class CodecByteBuffer(Codec):
             # len + flag
             return Frame(Flag.of(flag), None)
         else:
-
+            metaBufSize = min(Config.MAX_SIZE_META_STRING, buffer.remaining())
             # 1. decode sid and topic
-            by = Buffer()
+            by = Buffer(limit=metaBufSize)
             sid = self.decodeString(buffer, by, Config.MAX_SIZE_SID)
             topic = self.decodeString(buffer, by, Config.MAX_SIZE_TOPIC)
             metaString = self.decodeString(buffer, by, Config.MAX_SIZE_META_STRING)
 
             # 2. decode body
             dataRealSize = len0 - buffer.tell()
+            data: bytearray = bytearray()
             if dataRealSize > Config.MAX_SIZE_FRAGMENT:
                 # exceeded the limit, read and discard the bytes
                 data = bytearray(Config.MAX_SIZE_FRAGMENT)
@@ -103,7 +100,7 @@ class CodecByteBuffer(Codec):
             else:
                 data = buffer.read(dataRealSize)
 
-            message = MessageDefault().sid(sid).topic(topic).entity(
+            message = MessageDefault().set_sid(sid).set_topic(topic).set_entity(
                 EntityDefault().set_meta_string(metaString).set_data(data)
             )
             message.flag = Flag.of(flag)
@@ -125,11 +122,11 @@ class CodecByteBuffer(Codec):
                 if c != b' ':
                     buf.write(c)
 
-        buf.flip()
+        # buf.flip()
         if buf.limit() < 1:
             return ""
 
-        return buf.getvalue().decode(self.config.charset)
+        return buf.getvalue().decode(self.config.get_charset())
 
     def assertSize(self, name: str, size: int, limitSize: int) -> None:
         if size > limitSize:

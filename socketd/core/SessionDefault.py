@@ -1,6 +1,7 @@
 import asyncio
 
 from abc import ABC
+from typing import Callable, Any, Dict
 
 from .SessionBase import SessionBase
 from .Channel import Channel
@@ -18,35 +19,36 @@ class SessionDefault(SessionBase, ABC):
         super().__init__(channel)
         self.__loop = asyncio.get_event_loop()
 
-    def isValid(self) -> bool:
+    def is_valid(self) -> bool:
         return self.channel.is_valid()
 
-    def getRemoteAddress(self) -> str:
+    def get_remote_address(self) -> str:
         return self.channel.get_remote_address()
 
-    def getLocalAddress(self) -> str:
+    def get_local_address(self) -> str:
         return self.channel.get_local_address()
 
-    def getHandshake(self) -> Handshake:
+    def get_handshake(self) -> Handshake:
         return self.channel.get_handshake()
 
-    def sendPing(self):
+    def send_and_request_with_timeout(self, topic: str, content: Entity, timeout: int) -> Entity:
+        pass
+
+    def send_ping(self):
         self.channel.send_ping()
 
-    def send(self, topic: str, content: Entity):
-        message = MessageDefault().sid(self.generateId()).topic(topic).entity(content)
-        self.channel.send(Frame(Flag.Message, message), None)
+    async def send(self, topic: str, content: Entity):
+        message = MessageDefault().set_sid(self.generate_id()).set_topic(topic).set_entity(content)
+        await self.channel.send(Frame(Flag.Message, message), None)
 
-    def sendAndRequest(self, topic: str, content: Entity) -> Entity:
-        return self.sendAndRequest(topic, content, self.channel.getConfig().getReplyTimeout())
-
-    def sendAndRequest(self, topic: str, content: Entity, timeout: int) -> Entity:
-        if self.channel.getRequests().get() > self.channel.getConfig().getMaxRequests():
-            raise Exception("Sending too many requests: " + str(self.channel.getRequests().get()))
+    def send_and_request(self, topic: str, content: Entity, timeout: int) -> Entity:
+        # todo 不可用
+        if self.channel.get_requests().get() > self.channel.get_config().getMaxRequests():
+            raise Exception("Sending too many requests: " + str(self.channel.get_requests().get()))
         else:
-            self.channel.getRequests().incrementAndGet()
+            self.channel.get_requests().incrementAndGet()
 
-        message = MessageDefault().sid(self.generateId()).topic(topic).entity(content)
+        message = MessageDefault().sid(self.generate_id()).topic(topic).entity(content)
 
         try:
             self.__loop.run_in_executor(None, lambda: self.channel.send(Frame(Flag.Request, message)))
@@ -56,16 +58,15 @@ class SessionDefault(SessionBase, ABC):
             self.channel.remove_acceptor(message.getSid())
             # self.channel.get_requests().denominator()
 
-    def sendAndSubscribe(self, topic: str, content: Entity, consumer: Function):
+    def send_and_subscribe(self, topic: str, content: Entity, consumer: Function):
         message = MessageDefault().sid(self.generate_id()).topic(topic).entity(content)
         self.channel.send(Frame(Flag.Subscribe, message), None)
 
     def reply(self, from_msg: Message, content: Entity):
         self.channel.send(Frame(Flag.Reply, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
-    def replyEnd(self, from_msg: Message, content: Entity):
+    def reply_end(self, from_msg: Message, content: Entity):
         self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().sid(from_msg.get_sid()).entity(content)), None)
 
     def close(self):
         self.channel.send_close()
-

@@ -7,6 +7,7 @@ from websockets import broadcast
 from socketd.transport.server.ServerBase import ServerBase
 from .WsAioChannelAssistant import WsAioChannelAssistant
 from socketd.core.config.ServerConfig import ServerConfig
+from .impl.AIOServe import AIOServe
 from .impl.AIOWebSocketServerImpl import AIOWebSocketServerImpl
 
 log = logger.opt()
@@ -26,13 +27,17 @@ class WsAioServer(ServerBase):
         else:
             self.isStarted = True
         if self._config.getHost() is not None:
-            self.server = AIOWebSocketServerImpl(host="0.0.0.0", port=self._config.getPort(),
-                                                 ws_server=self,
-                                                 ssl=self._config.get_ssl_context())
+            self.server = AIOServe(ws_handler=AIOWebSocketServerImpl.on_message,
+                                   host="0.0.0.0", port=self._config.getPort(),
+                                   create_protocol=AIOWebSocketServerImpl,
+                                   ws_aio_server=self,
+                                   ssl=self._config.get_ssl_context())
         else:
-            self.server = AIOWebSocketServerImpl(host=self._config.getHost(), port=self._config.getPort(),
-                                                 ws_server=self,
-                                                 ssl=self._config.get_ssl_context())
+            self.server = AIOServe(ws_handler=AIOWebSocketServerImpl.on_message,
+                                   host=self._config.getHost(), port=self._config.getPort(),
+                                   create_protocol=AIOWebSocketServerImpl,
+                                   ws_aio_server=self,
+                                   ssl=self._config.get_ssl_context())
         self.__loop.run_until_complete(self.server)
         log.info("Server started: {server=" + self._config.getLocalUrl() + "}")
         return self
@@ -40,6 +45,9 @@ class WsAioServer(ServerBase):
     def message_all(self, message: str):
         """广播"""
         broadcast(self.server.ws_server.websockets, message)
+
+    def register(self, protocol: WebSocketServerProtocol) -> None:
+        self.server.ws_server.register(protocol)
 
     def stop(self):
         self.__loop.run_until_complete(asyncio.wait(self.stop))
