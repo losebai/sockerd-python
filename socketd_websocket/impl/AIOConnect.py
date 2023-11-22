@@ -13,34 +13,24 @@ from websockets.uri import parse_uri
 
 
 class AIOConnect(Connect):
-
-
     MAX_REDIRECTS_ALLOWED = 10
 
-    def __init__(
-        self,
-        uri: str,
-        client: 'WsAioClient',
-        *,
-        create_protocol: Optional[Callable[..., WebSocketClientProtocol]] = None,
-        logger: Optional[LoggerLike] = None,
-        compression: Optional[str] = "deflate",
-        origin: Optional[Origin] = None,
-        extensions: Optional[Sequence[ClientExtensionFactory]] = None,
-        subprotocols: Optional[Sequence[Subprotocol]] = None,
-        extra_headers: Optional[HeadersLike] = None,
-        user_agent_header: Optional[str] = USER_AGENT,
-        open_timeout: Optional[float] = 10,
-        ping_interval: Optional[float] = 20,
-        ping_timeout: Optional[float] = 20,
-        close_timeout: Optional[float] = None,
-        max_size: Optional[int] = 2**20,
-        max_queue: Optional[int] = 2**5,
-        read_limit: int = 2**16,
-        write_limit: int = 2**16,
-        **kwargs: Any,
-    ) -> None:
-        # Backwards compatibility: close_timeout used to be called timeout.
+    def __init__(self, uri: str, client: 'WsAioClient', *,
+                 create_protocol: Optional[Callable[..., WebSocketClientProtocol]] = None,
+                 logger: Optional[LoggerLike] = None, compression: Optional[str] = "deflate",
+                 origin: Optional[Origin] = None, extensions: Optional[Sequence[ClientExtensionFactory]] = None,
+                 subprotocols: Optional[Sequence[Subprotocol]] = None, extra_headers: Optional[HeadersLike] = None,
+                 user_agent_header: Optional[str] = USER_AGENT, open_timeout: Optional[float] = 10,
+                 ping_interval: Optional[float] = 20, ping_timeout: Optional[float] = 20,
+                 close_timeout: Optional[float] = None, max_size: Optional[int] = 2 ** 20,
+                 max_queue: Optional[int] = 2 ** 5, read_limit: int = 2 ** 16, write_limit: int = 2 ** 16,
+                 **kwargs: Any) -> None:
+        super().__init__(uri, create_protocol=create_protocol, logger=logger, compression=compression, origin=origin,
+                         extensions=extensions, subprotocols=subprotocols, extra_headers=extra_headers,
+                         user_agent_header=user_agent_header, open_timeout=open_timeout, ping_interval=ping_interval,
+                         ping_timeout=ping_timeout, close_timeout=close_timeout, max_size=max_size, max_queue=max_queue,
+                         read_limit=read_limit, write_limit=write_limit, **kwargs)
+
         timeout: Optional[float] = 10
         # If both are specified, timeout is ignored.
         if close_timeout is None:
@@ -124,6 +114,7 @@ class AIOConnect(Connect):
         self._create_connection = create_connection
         self._uri = uri
         self._wsuri = wsuri
+        self.channel = None
 
     def get_channel(self):
         return self.channel

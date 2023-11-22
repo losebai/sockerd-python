@@ -1,11 +1,9 @@
-
 import nest_asyncio
 from loguru import logger
 from websockets.protocol import State
 
 from socketd.core.ChannelDefault import ChannelDefault
 from websockets import WebSocketClientProtocol
-
 
 log = logger.opt()
 nest_asyncio.apply()
@@ -17,6 +15,7 @@ class AIOWebSocketClientImpl(WebSocketClientProtocol):
         self.client = client
         self.channel = ChannelDefault(self, client.get_config(), client.assistant())
         self.status_state = State.CONNECTING
+
     def get_channel(self):
         return self.channel
 

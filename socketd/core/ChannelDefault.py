@@ -3,6 +3,7 @@ from typing import Dict, Union, Generator, TypeVar
 
 from websockets import WebSocketCommonProtocol
 
+from socketd.core.AssertsUtil import AssertsUtil
 from socketd.core.ChannelBase import ChannelBase
 from socketd.core.Costants import Function, Flag
 from socketd.core.Session import Session
@@ -13,7 +14,6 @@ from socketd.core.module.Frame import Frame
 from socketd.core.module.MessageDefault import MessageDefault
 from socketd.transport.ChannelAssistant import ChannelAssistant
 
-
 S = TypeVar("S", bound=WebSocketCommonProtocol)
 
 thread_safe_dict = ThreadSafeDict()
@@ -22,7 +22,6 @@ thread_safe_dict = ThreadSafeDict()
 class ChannelDefault(ChannelBase):
 
     def __init__(self, source: S, config: Config, assistant: ChannelAssistant):
-        # WebSocketServerProtocol.__init__(self, *args, **kwargs)
         ChannelBase.__init__(self, config)
         self.source: WebSocketCommonProtocol = source
         self.assistant = assistant
@@ -41,9 +40,8 @@ class ChannelDefault(ChannelBase):
     def get_local_address(self) -> str:
         return self.assistant.get_local_address(self.source)
 
-
     async def send(self, frame: Frame, acceptor: Function) -> None:
-        # self.assert_closed()
+        AssertsUtil.assert_closed(self)
         if frame.get_message() is not None:
             message = frame.get_message()
 

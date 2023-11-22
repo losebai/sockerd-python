@@ -21,7 +21,7 @@ class WsAioServer(ServerBase):
         self.server: Serve = None
         self.stop = asyncio.Future()  # set this future to exit the server
 
-    def start(self) -> 'WsAioServer':
+    def start(self) -> 'Serve':
         if self.isStarted:
             raise Exception("Server started")
         else:
@@ -40,7 +40,7 @@ class WsAioServer(ServerBase):
                                    ssl=self._config.get_ssl_context())
         self.__loop.run_until_complete(self.server)
         log.info("Server started: {server=" + self._config.getLocalUrl() + "}")
-        return self
+        return self.server
 
     def message_all(self, message: str):
         """广播"""

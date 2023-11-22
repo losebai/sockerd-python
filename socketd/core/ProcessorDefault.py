@@ -21,7 +21,7 @@ class ProcessorDefault(Processor, ABC):
             self.listener = listener
 
     async def on_receive(self, channel: Channel, frame):
-        self.log.trace("{on_receive}", frame)
+        self.log.info("on_receive {frame}", frame=frame)
 
         if frame.get_flag() == Flag.Connect:
             connectMessage = frame.get_message()
@@ -63,7 +63,6 @@ class ProcessorDefault(Processor, ABC):
         if fragmentIdxStr is not None:
             index = int(fragmentIdxStr)
             frameNew = channel.get_config().get_fragment_handler().aggrFragment(channel, index, frame)
-
             if frameNew is None:
                 return
             else:

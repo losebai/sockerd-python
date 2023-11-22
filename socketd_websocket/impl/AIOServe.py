@@ -9,49 +9,36 @@ from websockets.extensions import ServerExtensionFactory
 from websockets.extensions.permessage_deflate import enable_server_permessage_deflate
 from websockets.headers import validate_subprotocols
 from websockets.http import USER_AGENT
-from websockets.legacy.server import HeadersLikeOrCallable, HTTPResponse, remove_path_argument, WebSocketServer
+from websockets.legacy.server import HeadersLikeOrCallable, HTTPResponse, remove_path_argument, WebSocketServer, Serve
 
 
+class AIOServe(Serve):
 
-class AIOServe:
-
-    def __init__(
-            self,
-            ws_handler: Union[
-                Callable[[WebSocketServerProtocol], Awaitable[Any]],
-                Callable[[WebSocketServerProtocol, str], Awaitable[Any]],  # deprecated
-            ],
-            host: Optional[Union[str, Sequence[str]]] = None,
-            port: Optional[int] = None,
-            ws_aio_server= None,
-            *,
-            create_protocol: Optional[Callable[..., WebSocketServerProtocol]] = None,
-            logger: Optional[LoggerLike] = None,
-            compression: Optional[str] = "deflate",
-            origins: Optional[Sequence[Optional[Origin]]] = None,
-            extensions: Optional[Sequence[ServerExtensionFactory]] = None,
-            subprotocols: Optional[Sequence[Subprotocol]] = None,
-            extra_headers: Optional[HeadersLikeOrCallable] = None,
-            server_header: Optional[str] = USER_AGENT,
-            process_request: Optional[
-                Callable[[str, Headers], Awaitable[Optional[HTTPResponse]]]
-            ] = None,
-            select_subprotocol: Optional[
+    def __init__(self, ws_handler: Union[
+        Callable[[WebSocketServerProtocol], Awaitable[Any]],
+        Callable[[WebSocketServerProtocol, str], Awaitable[Any]],  # deprecated
+    ], host: Optional[Union[str, Sequence[str]]] = None, port: Optional[int] = None, ws_aio_server=None, *,
+                 create_protocol: Optional[Callable[..., WebSocketServerProtocol]] = None,
+                 logger: Optional[LoggerLike] = None, compression: Optional[str] = "deflate",
+                 origins: Optional[Sequence[Optional[Origin]]] = None,
+                 extensions: Optional[Sequence[ServerExtensionFactory]] = None,
+                 subprotocols: Optional[Sequence[Subprotocol]] = None,
+                 extra_headers: Optional[HeadersLikeOrCallable] = None, server_header: Optional[str] = USER_AGENT,
+                 process_request: Optional[
+                     Callable[[str, Headers], Awaitable[Optional[HTTPResponse]]]
+                 ] = None, select_subprotocol: Optional[
                 Callable[[Sequence[Subprotocol], Sequence[Subprotocol]], Subprotocol]
-            ] = None,
-            open_timeout: Optional[float] = 10,
-            ping_interval: Optional[float] = 20,
-            ping_timeout: Optional[float] = 20,
-            close_timeout: Optional[float] = None,
-            max_size: Optional[int] = 2 ** 20,
-            max_queue: Optional[int] = 2 ** 5,
-            read_limit: int = 2 ** 16,
-            write_limit: int = 2 ** 16,
-            **kwargs: Any,
-    ) -> None:
+            ] = None, open_timeout: Optional[float] = 10, ping_interval: Optional[float] = 20,
+                 ping_timeout: Optional[float] = 20, close_timeout: Optional[float] = None,
+                 max_size: Optional[int] = 2 ** 20, max_queue: Optional[int] = 2 ** 5, read_limit: int = 2 ** 16,
+                 write_limit: int = 2 ** 16, **kwargs: Any) -> None:
 
-
-        # Backwards compatibility: recv() used to return None on closed connections
+        super().__init__(ws_handler, host, port, create_protocol=create_protocol, logger=logger,
+                         compression=compression, origins=origins, extensions=extensions, subprotocols=subprotocols,
+                         extra_headers=extra_headers, server_header=server_header, process_request=process_request,
+                         select_subprotocol=select_subprotocol, open_timeout=open_timeout, ping_interval=ping_interval,
+                         ping_timeout=ping_timeout, close_timeout=close_timeout, max_size=max_size, max_queue=max_queue,
+                         read_limit=read_limit, write_limit=write_limit, **kwargs)
         legacy_recv: bool = kwargs.pop("legacy_recv", False)
 
         # Backwards compatibility: the loop parameter used to be supported.

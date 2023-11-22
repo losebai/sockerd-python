@@ -7,8 +7,8 @@ from .Channel import Channel
 class SessionBase(Session, ABC):
     def __init__(self, channel: Channel):
         self.channel = channel
-        self.attr_map = None
-        self.session_id = None
+        self._attr_map = None
+        self._session_id = None
 
     def get_attr_map(self) -> Dict[str, Any]:
         if self._attr_map is None:

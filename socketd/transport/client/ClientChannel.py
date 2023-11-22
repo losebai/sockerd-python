@@ -1,12 +1,14 @@
-import threading
 from abc import ABC
 
+from socketd.core.AssertsUtil import AssertsUtil
+from socketd.core.Channel import Channel
 from socketd.core.ChannelBase import ChannelBase
 from socketd.transport.client.ClientConnector import ClientConnector
+from loguru import logger
 
 
 class ClientChannel(ChannelBase, ABC):
-    def __init__(self, real: 'AIOConnect', connector: ClientConnector):
+    def __init__(self, real: Channel, connector: ClientConnector):
         super().__init__(real.get_config())
         self.real = real
         self.connector: ClientConnector = connector
@@ -19,41 +21,41 @@ class ClientChannel(ChannelBase, ABC):
         #     self.heartbeatScheduledFuture = threading.Timer(connector.heartbeatInterval(), self.heartbeatHandle)
         #     self.heartbeatScheduledFuture.start()
 
-    def removeAcceptor(self, sid):
+    def remove_acceptor(self, sid):
         if self.real is not None:
-            self.real.removeAcceptor(sid)
+            self.real.remove_acceptor(sid)
 
-    def isValid(self):
+    def is_valid(self):
         if self.real is None:
             return False
         else:
-            return self.real.isValid()
+            return self.real.is_valid()
 
-    def isClosed(self):
+    def is_closed(self):
         if self.real is None:
             return False
         else:
-            return self.real.isClosed()
+            return self.real.is_closed()
 
-    def getRemoteAddress(self):
+    def get_remote_address(self):
         if self.real is None:
             return None
         else:
-            return self.real.getRemoteAddress()
+            return self.real.get_remote_address()
 
-    def getLocalAddress(self):
+    def get_local_address(self):
         if self.real is None:
             return None
         else:
             return self.real.get_local_address()
 
-    def heartbeatHandle(self):
-        self.assert_closed()
+    def heartbeat_handle(self):
+        AssertsUtil.assert_closed(self.real)
 
         with self:
             try:
-                self.prepareSend()
-                self.heartbeatHandler.heartbeatHandle(self.getSession())
+                self.prepare_send()
+                self.heartbeatHandler.heartbeat_handle()
             except Exception as e:
                 if self.connector.autoReconnect():
                     self.real.close()
@@ -61,33 +63,32 @@ class ClientChannel(ChannelBase, ABC):
                 raise e
 
     async def send(self, frame, acceptor):
-        # self.assert_closed()
+        AssertsUtil.assert_closed(self.real)
         try:
-            self.prepareSend()
+            self.prepare_send()
             await self.real.send(frame, acceptor)
         except Exception as e:
             if self.connector.autoReconnect():
-                self.real.close()
+                await self.real.close()
                 self.real = None
-
             raise e
 
     def retrieve(self, frame):
         self.real.retrieve(frame)
 
     def getSession(self):
-        return self.real.getSession()
+        return self.real.get_session()
 
     async def close(self, code: int = 1000,
                     reason: str = "", ):
         try:
             await super().close(code, reason)
             if self.real is not None:
-                self.real.close()
-        except:
-            pass
+                await self.real.close()
+        except Exception as e:
+            logger.error(e)
 
-    def prepareSend(self):
+    def prepare_send(self):
         if self.real is None or not self.real.is_valid():
             self.real = self.connector.connect()
             return True

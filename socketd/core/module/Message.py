@@ -13,6 +13,10 @@ class Message(ABC):
         pass
 
     @abstractmethod
+    def is_close(self) -> bool:
+        pass
+
+    @abstractmethod
     def get_sid(self) -> str:
         pass
 

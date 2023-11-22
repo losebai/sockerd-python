@@ -6,10 +6,8 @@ from abc import ABC
 from socketd.core.Listener import Listener
 from socketd.core.Session import Session
 from socketd.core.SocketD import SocketD
-from socketd.core.config.ServerConfig import ServerConfig
 from socketd.core.module.Message import Message
 from socketd.core.module.StringEntity import StringEntity
-from socketd_websocket.WsAioServer import WsAioServer
 
 
 class SimpleListener(Listener, ABC):
@@ -36,20 +34,21 @@ def idGenerator(config):
 
 
 async def main():
-    server = SocketD.create_server(ServerConfig("ws").setPort(7779))
-    server_session: WsAioServer = server.config(idGenerator).listen(
-        SimpleListener()).start()
-
-    await asyncio.sleep(3)
+    # server = SocketD.create_server(ServerConfig("ws").setPort(7779))
+    # server_session: WsAioServer = server.config(idGenerator).listen(
+    #     SimpleListener()).start()
+    #
+    # await asyncio.sleep(3)
 
     client_session: Session = SocketD.create_client("ws://127.0.0.1:7779") \
         .config(idGenerator).open()
 
     await client_session.send("demo", StringEntity("test"))
     # await client_session.send("demo2", StringEntity("test"))
+    await asyncio.sleep(1)
     # asyncio.get_event_loop().run_forever()
     await client_session.close()
-    await server_session.stop
+    # await server_session.stop
 
 
 

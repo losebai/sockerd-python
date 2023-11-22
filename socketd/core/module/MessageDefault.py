@@ -35,6 +35,9 @@ class MessageDefault(Message):
     def is_subscribe(self):
         return self.flag == Flag.Subscribe
 
+    def is_close(self):
+        return self.flag == Flag.Close
+
     def get_sid(self):
         return self.sid
 

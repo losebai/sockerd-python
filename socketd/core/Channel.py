@@ -1,8 +1,7 @@
 from typing import Any
-import socket
 
-from websockets import WebSocketServerProtocol
-
+from .Session import Session
+from .module.Frame import Frame
 from .module.Message import Message
 from abc import ABC, abstractmethod
 
@@ -85,12 +84,13 @@ class Channel:
         pass
 
     @abstractmethod
-    def retrieve(self, frame: 'Frame') -> None:
+    def retrieve(self, frame: Frame) -> None:
         pass
 
     @abstractmethod
-    def get_session(self) -> 'Session':
+    def get_session(self) -> Session:
         pass
 
-    async def close(self):
+    async def close(self, code: int = 1000,
+                    reason: str = "", ):
         pass
