@@ -1,9 +1,7 @@
 import asyncio
 import uuid
-import time
 from abc import ABC
 
-from websockets.legacy.client import Connect
 from websockets.legacy.server import Serve
 
 from socketd.core.Listener import Listener
@@ -12,8 +10,11 @@ from socketd.core.SocketD import SocketD
 from socketd.core.config.ServerConfig import ServerConfig
 from socketd.core.module.Message import Message
 from socketd.core.module.StringEntity import StringEntity
-from socketd_websocket.WsAioServer import WsAioServer
-from socketd_websocket.impl.AIOServe import AIOServe
+
+import sys
+from loguru import logger
+logger.remove()
+logger.add(sys.stderr, level="ERROR")
 
 
 class SimpleListener(Listener, ABC):
@@ -26,7 +27,6 @@ class SimpleListener(Listener, ABC):
             session.reply_end(message, StringEntity("test"))
         elif message.is_subscribe():
             session.reply_end(message, StringEntity("test"))
-
 
     def on_close(self, session):
         pass

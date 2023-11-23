@@ -1,15 +1,9 @@
 import asyncio
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait, ALL_COMPLETED
-from common.globalconfig import global_config
+from concurrent.futures import as_completed, wait, ALL_COMPLETED
 
 as_completed = as_completed
 wait = wait
 ALL_COMPLETED = ALL_COMPLETED
-
-ThreadPool = ThreadPoolExecutor()
-# 生产最大线程10个
-if global_config.active == "prod":
-    ThreadPool._max_workers = 10
 
 
 class AsyncUtils:
@@ -42,7 +36,7 @@ class AsyncUtils:
     async def to_thread(func, *args, **kwargs):
         """将一个阻塞型函数转换成协程任务，使用线程池异步执行"""
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(ThreadPool, lambda: func(*args, **kwargs))
+        return await loop.run_in_executor(None, lambda: func(*args, **kwargs))
 
     @staticmethod
     async def gather_concurrent(coros, limit=10):
@@ -51,6 +45,7 @@ class AsyncUtils:
         async def worker(semaphore, coro):
             async with semaphore:
                 return await coro
+
         if limit < 0:
             return await asyncio.gather(*coros)
         semaphore = asyncio.Semaphore(limit)

@@ -70,3 +70,4 @@ class SessionDefault(SessionBase, ABC):
 
     async def close(self):
         await self.channel.send_close()
+        await self.channel.close()
