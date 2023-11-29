@@ -14,8 +14,9 @@ from socketd.core.module.Frame import Frame
 from socketd.core.module.MessageDefault import MessageDefault
 from socketd.core.module.StringEntity import StringEntity
 from socketd.transport.CodecByteBuffer import CodecByteBuffer
+from socketd.transport.server.Server import Server
 from test.SimpleListenerTest import SimpleListenerTest
-from test.uitls import calc_time
+from test.uitls import calc_time, calc_async_time
 from loguru import logger
 
 
@@ -50,9 +51,9 @@ def main():
 def idGenerator(config):
     return config.id_generator(uuid.uuid4)
 
-@calc_time
-async def appliction_test():
-    server = SocketD.create_server(ServerConfig("ws").setPort(9999))
+@calc_async_time
+async def application_test():
+    server: Server = SocketD.create_server(ServerConfig("ws").setPort(9999))
     server_session: Serve = server.config(idGenerator).listen(
         SimpleListenerTest()).start()
 
@@ -65,11 +66,12 @@ async def appliction_test():
         await client_session.send("demo", StringEntity("test"))
     # await client_session.send("demo2", StringEntity("test"))
     await client_session.close()
-    asyncio.get_event_loop().run_forever()
+    await server.stop()
+    logger.debug("ok")
+    # asyncio.get_event_loop().run_forever()
 
 
 if __name__ == "__main__":
-    # main()
-    asyncio.run(appliction_test())
+    asyncio.run(application_test())
 
 

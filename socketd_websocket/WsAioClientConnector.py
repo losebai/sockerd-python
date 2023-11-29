@@ -17,9 +17,9 @@ class WsAioClientConnector(ClientConnectorBase):
         self.client: 'WsAioClient' = client
         self.real: Connect = None
         self.__loop = asyncio.get_event_loop()
-        self.__stop = asyncio.Future()
+        # self.__stop = asyncio.Future()
         super().__init__(client)
-        nest_asyncio.apply()
+        # nest_asyncio.apply()
 
     def connect(self) -> Channel:
         logger.debug('Start connecting to: {}'.format(self.client.get_config().url))
@@ -44,6 +44,7 @@ class WsAioClientConnector(ClientConnectorBase):
         if self.real is None:
             return
         try:
-            await self.__stop
+            # await self.__stop
+            pass
         except Exception as e:
-            logger.debug('{}'.format(e))
+            logger.debug(e)

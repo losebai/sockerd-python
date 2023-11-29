@@ -19,7 +19,7 @@ class WsAioServer(ServerBase):
         super().__init__(config, WsAioChannelAssistant(config))
         self.__loop = asyncio.get_event_loop()
         self.server: Serve = None
-        self.stop = asyncio.Future()  # set this future to exit the server
+        # self._stop = asyncio.Future()  # set this future to exit the server
 
     def start(self) -> 'Serve':
         if self.isStarted:
@@ -49,5 +49,7 @@ class WsAioServer(ServerBase):
     def register(self, protocol: WebSocketServerProtocol) -> None:
         self.server.ws_server.register(protocol)
 
-    def stop(self):
-        self.__loop.run_until_complete(asyncio.wait(self.stop))
+    async def stop(self):
+        self.server.ws_server.close()
+        # await self._stop
+

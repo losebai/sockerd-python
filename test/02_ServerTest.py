@@ -9,8 +9,8 @@ from socketd.core.config.ServerConfig import ServerConfig
 
 from test.SimpleListenerTest import idGenerator, SimpleListenerTest
 
-logger.remove()
-logger.add(sys.stderr, level="ERROR")
+# logger.remove()
+# logger.add(sys.stderr, level="ERROR")
 
 
 def main():
