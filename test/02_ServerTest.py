@@ -9,16 +9,16 @@ from socketd.core.config.ServerConfig import ServerConfig
 
 from test.SimpleListenerTest import idGenerator, SimpleListenerTest
 
-# logger.remove()
-# logger.add(sys.stderr, level="ERROR")
+logger.remove()
+logger.add(sys.stderr, level="ERROR")
 
 
-def main():
+async def main():
     server = SocketD.create_server(ServerConfig("ws").setPort(7779))
-    server_session: Serve = server.config(idGenerator).listen(
+    server_session: Serve = await server.config(idGenerator).listen(
         SimpleListenerTest()).start()
-    asyncio.get_event_loop().run_forever()
+    await asyncio.Future()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

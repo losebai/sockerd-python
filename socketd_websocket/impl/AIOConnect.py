@@ -118,3 +118,7 @@ class AIOConnect(Connect):
 
     def get_channel(self):
         return self.channel
+
+    async def close(self):
+        """完成握手"""
+        await self.protocol.close()

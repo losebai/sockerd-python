@@ -1,8 +1,13 @@
+import asyncio
+from typing import Optional, Sequence
+
 from loguru import logger
+from websockets.extensions import ClientExtensionFactory
 from websockets.protocol import State
+from websockets.uri import WebSocketURI
 
 from socketd.core.ChannelDefault import ChannelDefault
-from websockets import WebSocketClientProtocol
+from websockets import WebSocketClientProtocol, Origin, Subprotocol, HeadersLike
 
 log = logger.opt()
 
@@ -17,16 +22,24 @@ class AIOWebSocketClientImpl(WebSocketClientProtocol):
     def get_channel(self):
         return self.channel
 
+    async def handshake(self, wsuri: WebSocketURI, origin: Optional[Origin] = None,
+                        available_extensions: Optional[Sequence[ClientExtensionFactory]] = None,
+                        available_subprotocols: Optional[Sequence[Subprotocol]] = None,
+                        extra_headers: Optional[HeadersLike] = None) -> None:
+        """开始握手"""
+        return_data = await super().handshake(wsuri, origin, available_extensions, available_subprotocols, extra_headers)
+        await self.on_open()
+        return return_data
+
     def connection_open(self) -> None:
         """打开握手完成回调"""
         super().connection_open()
-        self.on_open()
-        log.debug("AIOWebSocketClientImpl 打开握手完成回调")
+        log.debug("AIOWebSocketClientImpl connection_open")
 
-    def on_open(self):
+    async def on_open(self):
         log.info("Client:Websocket onOpen...")
         try:
-            self.loop.run_until_complete(self.channel.send_connect(self.client.get_config().get_url()))
+            await self.channel.send_connect(self.client.get_config().get_url())
         except Exception as e:
             log.warning(str(e), exc_info=True)
             raise e
@@ -35,7 +48,6 @@ class AIOWebSocketClientImpl(WebSocketClientProtocol):
         """处理消息"""
         try:
             frame = self.client.get_assistant().read(data)
-
             if frame is not None:
                 self.client.processor().onReceive(self.channel, frame)
         except Exception as e:

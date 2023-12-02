@@ -1,4 +1,3 @@
-
 from typing import Callable
 from .Codec import Codec
 from socketd.core.module.Frame import Frame
@@ -7,6 +6,7 @@ from socketd.core.module.EntityDefault import EntityDefault
 from socketd.core.Costants import Flag
 from socketd.core.config.Config import Config
 from ..core.Buffer import Buffer
+
 
 class CodecByteBuffer(Codec):
     def __init__(self, config: 'ConfigBase'):

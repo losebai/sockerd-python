@@ -19,14 +19,14 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
         self.__loop = asyncio.get_event_loop()
         self.ws_aio_server = ws_aio_server
         self.__ws_server: WebSocketServer = ws_server
-        self.attachment = None
+        self.__attachment = None
         WebSocketServerProtocol.__init__(self, self.on_message, self.__ws_server, *args, **kwargs)
 
     def set_attachment(self, obj: Channel):
-        self.attachment = obj
+        self.__attachment = obj
 
     def get_attachment(self) -> Channel:
-        return self.attachment
+        return self.__attachment
 
     def connection_open(self) -> None:
         """握手完成回调"""
@@ -36,6 +36,7 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
 
     def handshake_handler(self):
         """socket_handshake"""
+        log.debug("handshake_handler")
 
     def on_open(self, conn) -> None:
         """create_protocol"""
@@ -60,7 +61,7 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
                 log.debug(message)
                 frame: Frame = self.ws_aio_server.get_assistant().read(message)
                 if frame is not None:
-                    await self.ws_aio_server.get_process().on_receive(self.attachment, frame)
+                    await self.ws_aio_server.get_process().on_receive(self.get_attachment(), frame)
                     if frame.get_flag() == Flag.Close:
                         """客户端主动关闭"""
                         await conn.close()
@@ -74,4 +75,5 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
             # raise e
 
     async def on_close(self, conn: 'WebSocketServerProtocol'):
+        """关闭tcp,结束握手"""
         await conn.close()

@@ -1,9 +1,8 @@
 import asyncio
 import uuid
 import sys
-
-import nest_asyncio
-from websockets.legacy.server import Serve
+import time
+from websockets.legacy.server import Serve, WebSocketServer
 
 from socketd.core.Buffer import Buffer
 from socketd.core.Costants import Flag
@@ -20,9 +19,7 @@ from test.uitls import calc_time, calc_async_time
 from loguru import logger
 
 
-nest_asyncio.apply()
-logger.remove()
-logger.add(sys.stderr, level="ERROR")
+
 
 
 def main():
@@ -54,24 +51,26 @@ def idGenerator(config):
 @calc_async_time
 async def application_test():
     server: Server = SocketD.create_server(ServerConfig("ws").setPort(9999))
-    server_session: Serve = server.config(idGenerator).listen(
+    server_session: WebSocketServer = await server.config(idGenerator).listen(
         SimpleListenerTest()).start()
 
-    await asyncio.sleep(3)
-
-    client_session: Session = SocketD.create_client("ws://127.0.0.1:9999") \
+    client_session: Session = await SocketD.create_client("ws://127.0.0.1:9999") \
         .config(idGenerator).open()
 
+    start_time = time.monotonic()
     for _ in range(100000):
         await client_session.send("demo", StringEntity("test"))
-    # await client_session.send("demo2", StringEntity("test"))
+    end_time = time.monotonic()
+    logger.info(f"Coroutine send took {(end_time - start_time) * 1000.0} monotonic to complete.")
     await client_session.close()
-    await server.stop()
-    logger.debug("ok")
-    # asyncio.get_event_loop().run_forever()
+    server_session.close()
+    # await server.stop()
+    logger.info("ok")
 
 
 if __name__ == "__main__":
-    asyncio.run(application_test())
+    logger.remove()
+    logger.add(sys.stderr, level="INFO")
+    asyncio.get_event_loop().run_until_complete(application_test())
 
 
