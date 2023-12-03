@@ -71,8 +71,8 @@ class ConfigBase(Config):
 
     def get_executor(self):
         if self._executor is None:
-            nThreads = self._core_threads if self.client_mode() else self._max_threads
-            self._executor = ThreadPoolExecutor(max_workers=nThreads, thread_name_prefix="socketd-channelExecutor-")
+            __nThreads = self._core_threads if self.client_mode() else self._max_threads
+            self._executor = ThreadPoolExecutor(max_workers=__nThreads, thread_name_prefix="socketd-channelExecutor-")
         return self._executor
 
     def set_executor(self, executor):

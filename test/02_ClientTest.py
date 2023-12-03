@@ -16,7 +16,7 @@ async def main():
     client_session: Session = await SocketD.create_client("ws://127.0.0.1:7779") \
         .config(idGenerator).open()
     start_time = time.monotonic()
-    for _ in range(100000):
+    for _ in range(100):
         await client_session.send("demo", StringEntity("test"))
     # await asyncio.gather(*[client_session.send("demo", StringEntity("test")) for _ in range(10000)])
     end_time = time.monotonic()

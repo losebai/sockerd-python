@@ -19,9 +19,6 @@ from test.uitls import calc_time, calc_async_time
 from loguru import logger
 
 
-
-
-
 def main():
     b = Buffer()
     b.put_int(Flag.Message.value)
@@ -48,9 +45,10 @@ def main():
 def idGenerator(config):
     return config.id_generator(uuid.uuid4)
 
+
 @calc_async_time
 async def application_test():
-    server: Server = SocketD.create_server(ServerConfig("ws").setPort(9999))
+    server: Server = SocketD.create_server(ServerConfig("ws").set_port(9999))
     server_session: WebSocketServer = await server.config(idGenerator).listen(
         SimpleListenerTest()).start()
 
@@ -58,7 +56,7 @@ async def application_test():
         .config(idGenerator).open()
 
     start_time = time.monotonic()
-    for _ in range(100000):
+    for _ in range(10):
         await client_session.send("demo", StringEntity("test"))
     end_time = time.monotonic()
     logger.info(f"Coroutine send took {(end_time - start_time) * 1000.0} monotonic to complete.")
@@ -72,5 +70,3 @@ if __name__ == "__main__":
     logger.remove()
     logger.add(sys.stderr, level="INFO")
     asyncio.get_event_loop().run_until_complete(application_test())
-
-

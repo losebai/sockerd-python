@@ -17,7 +17,6 @@ class SimpleListenerTest(Listener, ABC):
             session.replyEnd(message, StringEntity("test"))
         elif message.is_subscribe():
             session.replyEnd(message, StringEntity("test"))
-        # print("on_message")
 
     def on_close(self, session):
         pass

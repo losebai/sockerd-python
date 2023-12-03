@@ -59,13 +59,18 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
             while True:
                 message = await conn.recv()
                 log.debug(message)
-                frame: Frame = self.ws_aio_server.get_assistant().read(message)
+                # 采用线程池子执行IO耗时任务
+                frame: Frame = await self.__loop.run_in_executor(self.ws_aio_server.get_config().get_executor(),
+                                                                 lambda
+                                                                     _message: self.ws_aio_server.get_assistant().read(
+                                                                     _message), message)
                 if frame is not None:
                     await self.ws_aio_server.get_process().on_receive(self.get_attachment(), frame)
                     if frame.get_flag() == Flag.Close:
                         """客户端主动关闭"""
                         await conn.close()
-                        log.debug("{sessionId} 主动退出", sessionId=conn.get_attachment().get_session().get_session_id())
+                        log.debug("{sessionId} 主动退出",
+                                  sessionId=conn.get_attachment().get_session().get_session_id())
                         break
         except ConnectionClosedError as e:
             # 客户端异常关闭

@@ -24,20 +24,20 @@ class WsAioServer(ServerBase):
             raise Exception("Server started")
         else:
             self.isStarted = True
-        if self._config.getHost() is not None:
+        if self._config.get_host() is not None:
             _server = AIOServe(ws_handler=None,
-                               host="0.0.0.0", port=self._config.getPort(),
+                               host="0.0.0.0", port=self._config.get_port(),
                                create_protocol=AIOWebSocketServerImpl,
                                ws_aio_server=self,
                                ssl=self._config.get_ssl_context())
         else:
             _server = AIOServe(ws_handler=None,
-                               host=self._config.getHost(), port=self._config.getPort(),
+                               host=self._config.get_host(), port=self._config.get_port(),
                                create_protocol=AIOWebSocketServerImpl,
                                ws_aio_server=self,
                                ssl=self._config.get_ssl_context())
         self.server = _server
-        logger.info("Server started: {server=" + self._config.getLocalUrl() + "}")
+        logger.info("Server started: {server=" + self._config.get_local_url() + "}")
         return await self.server
 
     def message_all(self, message: str):
