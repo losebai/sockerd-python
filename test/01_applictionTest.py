@@ -30,8 +30,6 @@ def main():
     code = CodecByteBuffer(ServerConfig("ws"))
     b1 = code.write(Frame(Flag.Message,
                           MessageDefault().set_sid("1700534070000000001")
-                          .set_flag(Flag.Subscribe)
-                          .set_topic("tcp-java://127.0.0.1:9386/path?u=a&p=2")
                           .set_entity(StringEntity("test"))
                           ),
                     lambda l: Buffer())
@@ -56,14 +54,13 @@ async def application_test():
         .config(idGenerator).open()
 
     start_time = time.monotonic()
-    for _ in range(10):
+    for _ in range(100000):
         await client_session.send("demo", StringEntity("test"))
     end_time = time.monotonic()
     logger.info(f"Coroutine send took {(end_time - start_time) * 1000.0} monotonic to complete.")
     await client_session.close()
     server_session.close()
     # await server.stop()
-    logger.info("ok")
 
 
 if __name__ == "__main__":

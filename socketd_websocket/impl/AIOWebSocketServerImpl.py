@@ -49,21 +49,23 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
             channel: Channel = conn.get_attachment()
             if channel is not None:
                 # 有可能未 onOpen，就 onError 了；此时通道未成
-                self.ws_aio_server.processor().onError(channel.get_session(), ex)
+                self.ws_aio_server.get_processor().onError(channel.get_session(), ex)
         except Exception as e:
             log.error(e)
 
     async def on_message(self, conn: 'AIOWebSocketServerImpl', path: str):
         """ws_handler"""
-        try:
-            while True:
+        while True:
+            try:
+                if conn.closed:
+                    break
                 message = await conn.recv()
                 log.debug(message)
-                # 采用线程池子执行IO耗时任务
-                frame: Frame = await self.__loop.run_in_executor(self.ws_aio_server.get_config().get_executor(),
-                                                                 lambda
-                                                                     _message: self.ws_aio_server.get_assistant().read(
-                                                                     _message), message)
+                frame: Frame = self.ws_aio_server.get_assistant().read(
+                    message)
+                # # 采用线程池执行IO耗时任务
+                # frame: Frame = await self.__loop.run_in_executor(self.ws_aio_server.get_config(
+                # ).get_executor(), lambda _message: self.ws_aio_server.get_assistant().read( _message), message)
                 if frame is not None:
                     await self.ws_aio_server.get_process().on_receive(self.get_attachment(), frame)
                     if frame.get_flag() == Flag.Close:
@@ -72,11 +74,14 @@ class AIOWebSocketServerImpl(WebSocketServerProtocol, IWebSocketServer):
                         log.debug("{sessionId} 主动退出",
                                   sessionId=conn.get_attachment().get_session().get_session_id())
                         break
-        except ConnectionClosedError as e:
-            # 客户端异常关闭
-            log.error(e)
-        except Exception as e:
-            log.error(e)
+            except asyncio.CancelledError as c:
+                logger.warning(c)
+            except ConnectionClosedError as e:
+                # 客户端异常关闭
+                log.error(e)
+            except Exception as e:
+                log.error(e)
+                break
             # raise e
 
     async def on_close(self, conn: 'WebSocketServerProtocol'):

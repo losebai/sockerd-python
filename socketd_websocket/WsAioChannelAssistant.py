@@ -14,8 +14,8 @@ class WsAioChannelAssistant(ChannelAssistant):
         self.__loop = asyncio.get_event_loop()
 
     async def write(self, source: WebSocketServerProtocol, frame: Frame) -> None:
-        # writer: Buffer = await self.__loop.run_in_executor(self.config.get_executor(),
-        #                                   lambda _frame: self.config.get_codec().write(frame, lambda size: Buffer(limit=size)), frame)
+        # writer: Buffer = await self.__loop.run_in_executor(self.config.get_executor(), lambda _frame:
+        # self.config.get_codec().write(frame, lambda size: Buffer(limit=size)), frame)
         writer: Buffer = self.config.get_codec().write(frame, lambda size: Buffer(limit=size))
         await source.send(writer.getbuffer())
 

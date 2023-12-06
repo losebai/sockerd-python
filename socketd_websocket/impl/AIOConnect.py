@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import functools
-from typing import Callable, Union, Awaitable, Any, Optional, Sequence, Type, Generator, AsyncIterator, cast
+from typing import Callable, Any, Optional, Sequence
 
 from websockets import WebSocketServerProtocol, LoggerLike, Origin, Subprotocol, WebSocketClientProtocol, HeadersLike
 from websockets.extensions import ServerExtensionFactory, ClientExtensionFactory

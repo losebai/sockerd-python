@@ -8,7 +8,7 @@ from socketd.transport.server.ServerBase import ServerBase
 from .WsAioChannelAssistant import WsAioChannelAssistant
 from socketd.core.config.ServerConfig import ServerConfig
 from .impl.AIOServe import AIOServe
-from .impl.AIOWebSocketServerImpl import AIOWebSocketServerImpl
+from socketd_websocket.impl.AIOWebSocketServerImpl import AIOWebSocketServerImpl
 
 
 class WsAioServer(ServerBase):
@@ -50,5 +50,5 @@ class WsAioServer(ServerBase):
 
     async def stop(self):
         logger.info("WsAioServer stop...")
-        # self.server.ws_server.close()
+        await self.server.ws_server.close()
         await self._stop

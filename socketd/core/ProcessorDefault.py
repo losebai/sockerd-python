@@ -1,3 +1,4 @@
+import asyncio
 from abc import ABC
 from loguru import logger
 
@@ -28,7 +29,7 @@ class ProcessorDefault(Processor, ABC):
             await channel.send_connack(connectMessage)
             self.on_open(channel.get_session())
         elif frame.get_flag() == Flag.Connack:
-            message = frame.getMessage()
+            message = frame.get_message()
             channel.set_handshake(Handshake(message))
             self.on_open(channel.get_session())
         else:
@@ -77,8 +78,7 @@ class ProcessorDefault(Processor, ABC):
 
     def on_message(self, channel: Channel, message):
         # self.listener.on_message(channel.get_session(), message)
-        channel.get_config().get_executor() \
-            .submit(lambda _message: self.listener.on_message(channel.get_session(), _message), message)
+        channel.get_config().get_executor().submit(lambda _message: asyncio.run(self.listener.on_message(channel.get_session(), _message)), message)
 
     def on_close(self, session):
         self.listener.on_close(session)
