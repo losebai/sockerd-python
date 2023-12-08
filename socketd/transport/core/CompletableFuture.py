@@ -6,14 +6,14 @@ T = TypeVar('T')
 
 class CompletableFuture(Generic[T]):
 
-    def __init__(self):
-        self._future: asyncio.Future = None
+    def __init__(self, _future=None):
+        self._future: asyncio.Future = _future if _future else asyncio.Future()
 
-    async def get(self, timeout):
-        if not self._future:
-            self._future = asyncio.Future()
-        await asyncio.wait_for(self._future, timeout)
-        return self._future.result()
+    def get(self, timeout):
+        async def _get():
+            await asyncio.wait_for(self._future, timeout)
+            return self._future.result()
+        return _get()
 
     def accept(self, result: T, onError):
         self._future.set_result(result)

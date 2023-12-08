@@ -50,6 +50,7 @@ class SessionDefault(SessionBase, ABC):
         message = MessageDefault().set_sid(self.generate_id()).set_event(event).set_entity(content)
         try:
             await self.channel.send(Frame(Flag.Request, message), StreamAcceptorRequest(future, timeout))
+            # await self.channel.real.source.on_message()
             return await future.get(timeout)
         except asyncio.TimeoutError as e:
             if self.channel.is_valid():
@@ -69,10 +70,18 @@ class SessionDefault(SessionBase, ABC):
         await self.channel.send(Frame(Flag.Subscribe, message), None)
 
     async def reply(self, from_msg: Message, content: Entity):
-        await self.channel.send(Frame(Flag.Reply, MessageDefault().set_sid(from_msg.get_sid()).set_event(content)), None)
+        await self.channel.send(Frame(Flag.Reply,
+                                      MessageDefault()
+                                      .set_sid(from_msg.get_sid())
+                                      .set_event(from_msg.get_event())
+                                      .set_entity(content)), None)
 
     async def reply_end(self, from_msg: Message, content: Entity):
-        await self.channel.send(Frame(Flag.ReplyEnd, MessageDefault().set_sid(from_msg.get_sid()).set_event(content)), None)
+        await self.channel.send(Frame(Flag.ReplyEnd,
+                                      MessageDefault()
+                                      .set_sid(from_msg.get_sid())
+                                      .set_event(from_msg.get_event())
+                                      .set_entity(content)), None)
 
     async def close(self):
         await self.channel.send_close()

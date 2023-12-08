@@ -56,6 +56,7 @@ class ProcessorDefault(Processor, ABC):
                     await channel.close()
                     self.on_close(channel.get_session())
             except Exception as e:
+                logger.warning(e)
                 self.on_error(channel.get_session(), e)
 
     def on_receive_do(self, channel: Channel, frame: Frame, isReply):
@@ -69,7 +70,7 @@ class ProcessorDefault(Processor, ABC):
                 frame = frameNew
 
         if isReply:
-            channel.retrieve(frame)
+            channel.retrieve(frame, lambda error:self.on_error(channel, error))
         else:
             self.on_message(channel, frame.get_message())
 

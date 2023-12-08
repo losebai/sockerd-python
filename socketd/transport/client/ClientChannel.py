@@ -95,3 +95,6 @@ class ClientChannel(ChannelBase, ABC):
             return True
         else:
             return False
+
+    def get_real(self):
+        return self.real
