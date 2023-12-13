@@ -13,6 +13,7 @@ from .Costants import Flag, Function
 from .module.MessageDefault import MessageDefault
 from ..transport.core.CompletableFuture import CompletableFuture
 from ..transport.core.StreamAcceptorRequest import StreamAcceptorRequest
+from ..transport.core.StreamAcceptorSubscribe import StreamAcceptorSubscribe
 
 
 class SessionDefault(SessionBase, ABC):
@@ -77,7 +78,7 @@ class SessionDefault(SessionBase, ABC):
 
     async def send_and_subscribe(self, event: str, content: Entity, consumer: Callable[[Entity], Any], timeout: int):
         message = MessageDefault().set_sid(self.generate_id()).set_event(event).set_entity(content)
-        streamAcceptor = StreamAcceptorRequest(consumer, timeout)
+        streamAcceptor = StreamAcceptorSubscribe(consumer, timeout)
         await self.channel.send(Frame(Flag.Subscribe, message), streamAcceptor)
         return streamAcceptor
 

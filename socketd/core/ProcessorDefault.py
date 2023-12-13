@@ -70,7 +70,7 @@ class ProcessorDefault(Processor, ABC):
                 frame = frameNew
 
         if isReply:
-            channel.retrieve(frame, lambda error:self.on_error(channel, error))
+            channel.retrieve(frame, lambda error: self.on_error(channel, error))
         else:
             self.on_message(channel, frame.get_message())
 
