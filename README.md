@@ -119,4 +119,34 @@ sd:ws://19.10.2.3:1023/path?u=noear&t=1234
 | python | 开发中 | /  | 支持 ws 通讯架构           |
 | 其它     | 计划中 | 计划中  |                      |
 
+## 快速入门
+```python
+async def application():
+    # 服务端
+    server: Server = SocketD.create_server(ServerConfig("ws").set_port(9999))
+    server_session: WebSocketServer = await server.config(idGenerator).listen(
+        SimpleListenerTest()).start()
+    
+    # 客户端
+    client_session: Session = await SocketD.create_client("ws://127.0.0.1:9999") \
+        .config(idGenerator).open()
 
+    start_time = time.monotonic()
+    for _ in range(100):
+        await client_session.send("demo", StringEntity("test"))
+        await client_session.send_and_request("demo", StringEntity("test"), 100)
+        await client_session.send_and_subscribe("demo", StringEntity("test"), send_and_subscribe_test, 100)
+    end_time = time.monotonic()
+    logger.info(f"Coroutine send took {(end_time - start_time) * 1000.0} monotonic to complete.")
+    await client_session.close()
+    server_session.close()
+    await server.stop()
+
+asyncio.run(application())
+```
+
+非windows用户可以引入以下依赖，性能提升2倍，asyncio（协程）性能直逼Go
+```python
+import uvloop
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+```

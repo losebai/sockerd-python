@@ -1,14 +1,12 @@
 from io import BytesIO
 from enum import Enum
+from typing import Callable
 
 
-def t(): ...
+Function = Callable
 
 
-Function = type(t)
-
-
-class Flag(Enum):
+class Flag:
     Unknown = 0
     Connect = 10
     Connack = 11
@@ -45,6 +43,31 @@ class Flag(Enum):
             return Flag.ReplyEnd
         else:
             return Flag.Unknown
+
+    @staticmethod
+    def name(code):
+        if code == 10:
+            return "Connect"
+        elif code == 11:
+            return"Connack"
+        elif code == 20:
+            return "Ping"
+        elif code == 21:
+            return "Pong"
+        elif code == 30:
+            return "Close"
+        elif code == 40:
+            return "Message"
+        elif code == 41:
+            return "Request"
+        elif code == 42:
+            return "Subscribe"
+        elif code == 48:
+            return "Reply"
+        elif code == 49:
+            return "ReplyEnd"
+        else:
+            return "Unknown"
 
 
 class Constants:
