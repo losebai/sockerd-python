@@ -59,18 +59,18 @@ async def application_test():
         .config(idGenerator).open()
 
     start_time = time.monotonic()
-    for _ in range(10):
-        await client_session.send("demo", StringEntity("test"))
+    for _ in range(100):
+        # await client_session.send("demo", StringEntity("test"))
         # await client_session.send_and_request("demo", StringEntity("test"), 100)
         await client_session.send_and_subscribe("demo", StringEntity("test"), send_and_subscribe_test, 100)
     end_time = time.monotonic()
     logger.info(f"Coroutine send took {(end_time - start_time) * 1000.0} monotonic to complete.")
     await client_session.close()
     server_session.close()
-    await server.stop()
+    # await server.stop()
 
 
 if __name__ == "__main__":
-    # logger.remove()
-    # logger.add(sys.stderr, level="INFO")
+    logger.remove()
+    logger.add(sys.stderr, level="INFO")
     asyncio.get_event_loop().run_until_complete(application_test())
